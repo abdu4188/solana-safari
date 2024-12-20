@@ -29,6 +29,13 @@
       "when": 1734735199071,
       "tag": "0003_whole_stingray",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1734735932850,
+      "tag": "0004_petite_xorn",
+      "breakpoints": true
     }
   ]
 }
