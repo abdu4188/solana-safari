@@ -41,12 +41,14 @@ export async function seed() {
   }
 }
 
-// Run the seed function if this file is executed directly with Bun
-if (import.meta.main) {
+// Run the seed function if this file is executed directly
+const isDirectExecution = process.argv[1] === new URL(import.meta.url).pathname;
+
+if (isDirectExecution) {
   seed()
     .then(() => process.exit(0))
     .catch((error) => {
-      console.error(error);
+      console.error("Failed to seed database:", error);
       process.exit(1);
     });
 }
