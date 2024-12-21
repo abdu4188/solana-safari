@@ -24,4 +24,5 @@ export interface AnagramPuzzle extends Puzzle {
 export interface QuizPuzzle extends Puzzle {
   type: "quiz";
   options: string[];
+  explanation?: string;
 }
