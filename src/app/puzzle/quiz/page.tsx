@@ -1,36 +1,155 @@
 "use client";
 
-import { useState } from "react";
-import { quizPuzzle } from "@/lib/dummy-data";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import type { QuizPuzzle } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "@/components/ui/toaster";
+
+const SOLANA_TOPICS = [
+  "Proof of History",
+  "Solana Programs",
+  "Solana Architecture",
+  "Solana Tokenomics",
+  "Solana Consensus",
+  "Solana DeFi",
+  "Solana NFTs",
+  "Solana Security",
+  "Solana Scalability",
+  "Solana Development",
+];
 
 export default function QuizPuzzle() {
   const [selectedAnswer, setSelectedAnswer] = useState<string>("");
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [showHint, setShowHint] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [quiz, setQuiz] = useState<QuizPuzzle | null>(null);
+  const { toast } = useToast();
+
+  const loadNewQuiz = async () => {
+    setLoading(true);
+    setShowHint(false);
+    setIsCorrect(null);
+    setSelectedAnswer("");
+    try {
+      // Randomly select a Solana topic
+      const topic =
+        SOLANA_TOPICS[Math.floor(Math.random() * SOLANA_TOPICS.length)];
+
+      // Call the API route
+      const response = await fetch("/api/quiz", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ topic }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch quiz");
+      }
+
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      setQuiz(data.quiz);
+    } catch (error) {
+      console.error("Failed to load quiz:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load a new quiz. Please try again.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadNewQuiz();
+  }, []);
 
   const checkAnswer = () => {
-    setIsCorrect(selectedAnswer === quizPuzzle.answer);
+    if (!quiz) return;
+
+    const correct = selectedAnswer === quiz.answer;
+    setIsCorrect(correct);
+
+    if (correct) {
+      toast({
+        description: "🎉 Correct! Well done!",
+        className: "bg-green-500 text-white",
+      });
+      // Show the explanation
+      if (quiz.explanation) {
+        toast({
+          title: "Learn More",
+          description: quiz.explanation,
+          className: "bg-blue-500 text-white mt-2",
+        });
+      }
+    } else {
+      toast({
+        variant: "destructive",
+        description: "❌ That's not correct. Try again!",
+      });
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto p-4 text-center">
+        <p>Loading quiz...</p>
+      </div>
+    );
+  }
+
+  if (!quiz) {
+    return (
+      <div className="container mx-auto p-4 text-center">
+        <p>Error loading quiz. Please try again.</p>
+        <Button onClick={loadNewQuiz} className="mt-4">
+          Try Again
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-4">
       <div className="max-w-2xl mx-auto">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold mb-2">Crypto Quiz</h1>
-          <p className="text-muted-foreground mb-4">{quizPuzzle.question}</p>
+          <h1 className="text-3xl font-bold mb-2">Solana Quiz Challenge</h1>
+          <p className="text-muted-foreground mb-4">
+            Test your Solana knowledge!
+          </p>
         </div>
 
         <Card className="p-6 mb-6">
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-sm text-muted-foreground">
+                Difficulty: {quiz.difficulty}
+              </span>
+              <span className="text-sm font-semibold">
+                {quiz.points} points
+              </span>
+            </div>
+            <h2 className="text-xl font-semibold mb-4">{quiz.question}</h2>
+          </div>
+
           <RadioGroup
             value={selectedAnswer}
             onValueChange={setSelectedAnswer}
             className="space-y-4"
           >
-            {quizPuzzle.options.map((option) => (
+            {quiz.options.map((option) => (
               <div key={option} className="flex items-center space-x-2">
                 <RadioGroupItem
                   value={option}
@@ -41,7 +160,7 @@ export default function QuizPuzzle() {
                   htmlFor={option}
                   className={`cursor-pointer ${
                     isCorrect !== null &&
-                    option === quizPuzzle.answer &&
+                    option === quiz.answer &&
                     "text-green-500 font-semibold"
                   }`}
                 >
@@ -51,54 +170,45 @@ export default function QuizPuzzle() {
             ))}
           </RadioGroup>
 
-          <Button
-            className="w-full mt-6"
-            onClick={checkAnswer}
-            disabled={!selectedAnswer || isCorrect !== null}
-          >
-            Check Answer
-          </Button>
-
-          {isCorrect !== null && (
-            <div
-              className={`mt-4 p-4 rounded-md text-center ${
-                isCorrect
-                  ? "bg-green-500/10 text-green-500"
-                  : "bg-red-500/10 text-red-500"
-              }`}
+          <div className="mt-6 space-y-4">
+            <Button
+              className="w-full"
+              onClick={checkAnswer}
+              disabled={!selectedAnswer || isCorrect !== null}
             >
-              {isCorrect ? (
-                <span>🎉 Correct! Well done!</span>
-              ) : (
-                <span>❌ Incorrect. Try again!</span>
-              )}
-            </div>
-          )}
-        </Card>
+              Check Answer
+            </Button>
 
-        {quizPuzzle.hints && (
-          <Card className="p-6">
-            <div className="text-center mb-4">
-              <Button
-                variant="outline"
-                onClick={() => setShowHint(!showHint)}
-                className="mb-4"
-              >
-                {showHint ? "Hide Hint" : "Show Hint"}
-              </Button>
-            </div>
-            {showHint && (
-              <ul className="list-disc list-inside space-y-2">
-                {quizPuzzle.hints.map((hint, index) => (
-                  <li key={index} className="text-muted-foreground">
-                    {hint}
-                  </li>
-                ))}
-              </ul>
+            {quiz.hints && quiz.hints.length > 0 && (
+              <div className="text-center">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowHint(!showHint)}
+                  className="mb-4"
+                >
+                  {showHint ? "Hide Hint" : "Show Hint"}
+                </Button>
+                {showHint && (
+                  <ul className="list-disc list-inside space-y-2">
+                    {quiz.hints.map((hint, index) => (
+                      <li key={index} className="text-muted-foreground">
+                        {hint}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             )}
-          </Card>
-        )}
+
+            {isCorrect !== null && (
+              <Button className="w-full" onClick={loadNewQuiz}>
+                Try Another Question
+              </Button>
+            )}
+          </div>
+        </Card>
       </div>
+      <Toaster />
     </div>
   );
 }

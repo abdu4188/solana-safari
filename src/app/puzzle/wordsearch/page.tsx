@@ -1,13 +1,47 @@
 "use client";
 
-import { useState } from "react";
-import { wordSearchPuzzle } from "@/lib/dummy-data";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { getRandomWords, generateWordSearchGrid } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function WordSearchPuzzle() {
   const [selectedCells, setSelectedCells] = useState<string[]>([]);
   const [foundWords, setFoundWords] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [puzzle, setPuzzle] = useState<{
+    grid: string[][];
+    words: string[];
+  } | null>(null);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    loadNewPuzzle();
+  }, []);
+
+  const loadNewPuzzle = async () => {
+    setLoading(true);
+    try {
+      const words = await getRandomWords(4);
+      const upperWords = words.map((w) => w.term.toUpperCase());
+      const grid = generateWordSearchGrid(upperWords);
+      setPuzzle({
+        grid,
+        words: upperWords,
+      });
+    } catch (error) {
+      console.error("Failed to load puzzle:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load new puzzle. Please try again.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCellClick = (rowIndex: number, colIndex: number) => {
     const cellId = `${rowIndex}-${colIndex}`;
@@ -19,28 +53,75 @@ export default function WordSearchPuzzle() {
   };
 
   const checkWord = () => {
+    if (!puzzle) return;
+
     const selectedWord = selectedCells
       .map((cellId) => {
         const [row, col] = cellId.split("-").map(Number);
-        return wordSearchPuzzle.grid[row][col];
+        return puzzle.grid[row][col];
       })
       .join("");
 
     if (
-      wordSearchPuzzle.words.includes(selectedWord) &&
+      puzzle.words.includes(selectedWord) &&
       !foundWords.includes(selectedWord)
     ) {
-      setFoundWords((prev) => [...prev, selectedWord]);
+      setFoundWords((prev) => {
+        const newFoundWords = [...prev, selectedWord];
+        if (newFoundWords.length === puzzle.words.length) {
+          toast({
+            description:
+              "🎉 Congratulations! You&apos;re a true Solana expert!",
+            className: "bg-green-500 text-white",
+          });
+        } else {
+          toast({
+            description: `✨ Great! You found "${selectedWord}"!`,
+            className: "bg-green-500 text-white",
+          });
+        }
+        return newFoundWords;
+      });
+      setSelectedCells([]);
+    } else if (puzzle.words.includes(selectedWord)) {
+      toast({
+        description: "🔍 You&apos;ve already found this word!",
+        className: "bg-yellow-500 text-white",
+      });
+      setSelectedCells([]);
+    } else {
+      toast({
+        variant: "destructive",
+        description: "❌ That&apos;s not one of the words. Try again!",
+      });
       setSelectedCells([]);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="container mx-auto p-4 text-center">
+        <p>Loading puzzle...</p>
+      </div>
+    );
+  }
+
+  if (!puzzle) {
+    return (
+      <div className="container mx-auto p-4 text-center">
+        <p>Error loading puzzle. Please try again.</p>
+      </div>
+    );
+  }
+
+  const allWordsFound = foundWords.length === puzzle.words.length;
+
   return (
     <div className="container mx-auto p-4">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold mb-2">Word Search Puzzle</h1>
+        <h1 className="text-3xl font-bold mb-2">Solana Word Search</h1>
         <p className="text-muted-foreground mb-4">
-          {wordSearchPuzzle.question}
+          Find these Solana and Web3 terms hidden in the grid
         </p>
       </div>
 
@@ -48,7 +129,7 @@ export default function WordSearchPuzzle() {
         <div>
           <Card className="p-4">
             <div className="grid grid-cols-10 gap-1">
-              {wordSearchPuzzle.grid.map((row, rowIndex) =>
+              {puzzle.grid.map((row, rowIndex) =>
                 row.map((letter, colIndex) => (
                   <Button
                     key={`${rowIndex}-${colIndex}`}
@@ -66,20 +147,34 @@ export default function WordSearchPuzzle() {
               )}
             </div>
           </Card>
-          <Button
-            className="mt-4 w-full"
-            onClick={checkWord}
-            disabled={selectedCells.length === 0}
-          >
-            Check Word
-          </Button>
+          <div className="mt-4 space-y-2">
+            <Button
+              className="w-full"
+              onClick={checkWord}
+              disabled={selectedCells.length === 0}
+            >
+              Check Word
+            </Button>
+            {allWordsFound && (
+              <Button
+                className="w-full"
+                onClick={() => {
+                  setFoundWords([]);
+                  setSelectedCells([]);
+                  loadNewPuzzle();
+                }}
+              >
+                Play Again
+              </Button>
+            )}
+          </div>
         </div>
 
         <div>
           <Card className="p-4">
-            <h2 className="text-xl font-semibold mb-4">Words to Find</h2>
+            <h2 className="text-xl font-semibold mb-4">Solana Terms to Find</h2>
             <div className="space-y-2">
-              {wordSearchPuzzle.words.map((word) => (
+              {puzzle.words.map((word) => (
                 <div
                   key={word}
                   className={`p-2 rounded-md ${
@@ -94,21 +189,9 @@ export default function WordSearchPuzzle() {
               ))}
             </div>
           </Card>
-
-          {wordSearchPuzzle.hints && (
-            <Card className="p-4 mt-4">
-              <h2 className="text-xl font-semibold mb-4">Hints</h2>
-              <ul className="list-disc list-inside space-y-2">
-                {wordSearchPuzzle.hints.map((hint, index) => (
-                  <li key={index} className="text-muted-foreground">
-                    {hint}
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          )}
         </div>
       </div>
+      <Toaster />
     </div>
   );
 }
