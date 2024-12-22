@@ -20,6 +20,7 @@ export interface WordSearchPuzzle extends Puzzle {
 
 export interface AnagramPuzzle extends Puzzle {
   type: "anagram";
+  scrambledWord: string;
 }
 
 export interface QuizPuzzle extends Puzzle {

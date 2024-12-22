@@ -61,8 +61,8 @@ Format your response as JSON with this structure:
       id: Math.random().toString(36).substring(7), // temporary ID
       type: "quiz",
       difficulty: quiz.difficulty,
-      question: quiz.question,
-      answer: quiz.answer,
+      content: quiz.question,
+      solution: quiz.answer,
       options: quiz.options,
       points:
         quiz.difficulty === "hard"

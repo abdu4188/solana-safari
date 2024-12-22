@@ -71,7 +71,7 @@ export default function QuizPuzzle() {
   const checkAnswer = async () => {
     if (!quiz || !userId) return;
 
-    const correct = selectedAnswer === quiz.answer;
+    const correct = selectedAnswer === quiz.solution;
     setIsCorrect(correct);
 
     if (correct) {
@@ -161,7 +161,7 @@ export default function QuizPuzzle() {
                 {quiz.points} points
               </span>
             </div>
-            <h2 className="text-xl font-semibold mb-4">{quiz.question}</h2>
+            <h2 className="text-xl font-semibold mb-4">{quiz.content}</h2>
           </div>
 
           <RadioGroup
@@ -180,7 +180,7 @@ export default function QuizPuzzle() {
                   htmlFor={option}
                   className={`cursor-pointer ${
                     isCorrect !== null &&
-                    option === quiz.answer &&
+                    option === quiz.solution &&
                     "text-green-500 font-semibold"
                   }`}
                 >
