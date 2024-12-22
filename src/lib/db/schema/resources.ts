@@ -164,9 +164,7 @@ export const rewards = pgTable(
   "rewards",
   {
     id: serial("id").primaryKey(),
-    userId: integer("user_id")
-      .references(() => users.id)
-      .notNull(),
+    userId: varchar("user_id", { length: 256 }).notNull(),
     achievementId: integer("achievement_id").references(() => achievements.id),
     puzzleId: integer("puzzle_id").references(() => puzzles.id),
     tokenType: varchar("token_type", { length: 50 }).notNull(),

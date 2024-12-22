@@ -4,10 +4,12 @@ export interface Puzzle {
   id: string;
   type: PuzzleType;
   difficulty: "easy" | "medium" | "hard";
-  question: string;
-  answer: string;
+  title?: string;
+  content: string;
+  solution: string;
   hints?: string[];
   points: number;
+  explanation?: string;
 }
 
 export interface WordSearchPuzzle extends Puzzle {
@@ -18,11 +20,9 @@ export interface WordSearchPuzzle extends Puzzle {
 
 export interface AnagramPuzzle extends Puzzle {
   type: "anagram";
-  scrambledWord: string;
 }
 
 export interface QuizPuzzle extends Puzzle {
   type: "quiz";
   options: string[];
-  explanation?: string;
 }

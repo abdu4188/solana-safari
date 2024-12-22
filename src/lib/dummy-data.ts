@@ -35,7 +35,7 @@ export const anagramPuzzle: AnagramPuzzle = {
   question: "Unscramble this cryptocurrency",
   answer: "ETHEREUM",
   scrambledWord: "MURETHE",
-  points: 50,
+  points: 100,
   hints: ["Smart contract platform", "Second largest by market cap"],
 };
 
@@ -51,6 +51,6 @@ export const quizPuzzle: QuizPuzzle = {
     "Charlie Lee",
     "Craig Wright",
   ],
-  points: 75,
+  points: 100,
   hints: ["Anonymous creator", "Published the whitepaper in 2008"],
 };

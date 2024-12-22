@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
-import { searchSimilarContent } from "@/lib/services/embeddings";
+import { openai } from "@/lib/openai";
 import { getEmbedding } from "@/lib/services/openai";
+import { searchSimilarContent } from "@/lib/services/embeddings";
+import { savePuzzle } from "@/lib/services/puzzle";
 import type { QuizPuzzle } from "@/lib/types";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-async function generateSolanaQuiz(topic: string): Promise<QuizPuzzle> {
+async function generateSolanaQuiz(
+  topic: string,
+  gameId: number
+): Promise<QuizPuzzle> {
   // Get embedding for the topic
   const topicEmbedding = await getEmbedding(topic);
 
@@ -38,12 +38,19 @@ ${context}
 
 Format your response as JSON with this structure:
 {
-  "question": "The question text",
+  "title": "A catchy title for the quiz",
+  "content": "The question text",
+  "solution": "The correct option exactly as written in options",
   "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
-  "answer": "The correct option exactly as written in options",
   "explanation": "Brief explanation of why this is correct",
   "difficulty": "easy|medium|hard",
-  "hints": ["Hint 1", "Hint 2"]
+  "hints": ["Hint 1", "Hint 2"],
+  "points": 100,
+  "timeLimit": 60,
+  "metadata": {
+    "category": "quiz",
+    "topic": "${topic}"
+  }
 }`,
       },
     ],
@@ -58,19 +65,25 @@ Format your response as JSON with this structure:
 
   try {
     const quiz = JSON.parse(quizContent);
+
+    // Save the quiz to the database
+    const savedPuzzle = await savePuzzle(
+      gameId,
+      quiz,
+      "trivia",
+      quiz.difficulty,
+      relevantContent
+    );
+
+    // Convert the database puzzle to a QuizPuzzle type
     return {
-      id: Math.random().toString(36).substring(7), // temporary ID
+      id: savedPuzzle.id.toString(),
       type: "quiz",
       difficulty: quiz.difficulty,
-      question: quiz.question,
-      answer: quiz.answer,
+      question: quiz.content,
+      answer: quiz.solution,
       options: quiz.options,
-      points:
-        quiz.difficulty === "hard"
-          ? 100
-          : quiz.difficulty === "medium"
-          ? 75
-          : 50,
+      points: quiz.points,
       hints: quiz.hints,
       explanation: quiz.explanation,
     };
@@ -83,7 +96,8 @@ Format your response as JSON with this structure:
 export async function POST(req: Request) {
   try {
     const { topic } = await req.json();
-    const quiz = await generateSolanaQuiz(topic);
+    const gameId = 1; // You might want to make this dynamic
+    const quiz = await generateSolanaQuiz(topic, gameId);
     return NextResponse.json({ quiz });
   } catch (error) {
     console.error("Error generating quiz:", error);

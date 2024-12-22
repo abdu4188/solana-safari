@@ -8,19 +8,11 @@ import { Label } from "@/components/ui/label";
 import type { QuizPuzzle } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
-
-const SOLANA_TOPICS = [
-  "Proof of History",
-  "Solana Programs",
-  "Solana Architecture",
-  "Solana Tokenomics",
-  "Solana Consensus",
-  "Solana DeFi",
-  "Solana NFTs",
-  "Solana Security",
-  "Solana Scalability",
-  "Solana Development",
-];
+import { SOLANA_TOPICS } from "@/lib/constants";
+import { createReward } from "@/lib/actions/rewards";
+import { useAuth } from "@clerk/nextjs";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default function QuizPuzzle() {
   const [selectedAnswer, setSelectedAnswer] = useState<string>("");
@@ -29,6 +21,7 @@ export default function QuizPuzzle() {
   const [loading, setLoading] = useState(true);
   const [quiz, setQuiz] = useState<QuizPuzzle | null>(null);
   const { toast } = useToast();
+  const { userId } = useAuth();
 
   const loadNewQuiz = async () => {
     setLoading(true);
@@ -75,8 +68,8 @@ export default function QuizPuzzle() {
     loadNewQuiz();
   }, []);
 
-  const checkAnswer = () => {
-    if (!quiz) return;
+  const checkAnswer = async () => {
+    if (!quiz || !userId) return;
 
     const correct = selectedAnswer === quiz.answer;
     setIsCorrect(correct);
@@ -86,6 +79,26 @@ export default function QuizPuzzle() {
         description: "🎉 Correct! Well done!",
         className: "bg-green-500 text-white",
       });
+
+      // Create reward
+      const result = await createReward({
+        userId: userId,
+        puzzleId: parseInt(quiz.id),
+        tokenType: "points",
+        tokenAmount: quiz.points,
+        reason: "Quiz completed successfully",
+      });
+
+      if (result.success) {
+        // Emit points updated event
+        window.dispatchEvent(new Event("points-updated"));
+
+        toast({
+          description: `🎁 You earned ${quiz.points} points!`,
+          className: "bg-blue-500 text-white",
+        });
+      }
+
       // Show the explanation
       if (quiz.explanation) {
         toast({
@@ -124,11 +137,18 @@ export default function QuizPuzzle() {
   return (
     <div className="container mx-auto p-4">
       <div className="max-w-2xl mx-auto">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold mb-2">Solana Quiz Challenge</h1>
-          <p className="text-muted-foreground mb-4">
-            Test your Solana knowledge!
-          </p>
+        <div className="flex items-center mb-8">
+          <Link href="/">
+            <Button variant="ghost" size="icon" className="mr-4">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <div className="text-center flex-1">
+            <h1 className="text-3xl font-bold mb-2">Solana Quiz Challenge</h1>
+            <p className="text-muted-foreground mb-4">
+              Test your Solana knowledge!
+            </p>
+          </div>
         </div>
 
         <Card className="p-6 mb-6">
