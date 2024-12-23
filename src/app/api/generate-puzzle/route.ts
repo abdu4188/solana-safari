@@ -41,14 +41,14 @@ export async function POST(req: Request) {
 
     // Generate the prompt based on puzzle type
     Logger.info("ai", "Generating puzzle prompt", { type, topic, difficulty });
-    const prompt = generatePuzzlePrompt(type, topic, difficulty, context);
+    const promptData = generatePuzzlePrompt(type, topic, difficulty, context);
 
     // Generate puzzle using AI
     Logger.info("ai", "Requesting puzzle generation from AI");
-    const puzzleData = await generatePuzzleWithAI(prompt);
+    const puzzleData = await generatePuzzleWithAI(promptData);
 
     // Save to database
-    Logger.info("api", "Saving puzzle to database", { gameId });
+    Logger.info("api", "Saving puzzle to database");
     const savedPuzzle = await savePuzzle(
       gameId,
       puzzleData,
@@ -59,10 +59,6 @@ export async function POST(req: Request) {
 
     Logger.info("api", "Successfully generated and saved puzzle", {
       puzzleId: savedPuzzle.id,
-      wordCount:
-        type === "wordsearch"
-          ? (savedPuzzle.metadata as { words: string[] })?.words?.length
-          : undefined,
     });
 
     return NextResponse.json({
@@ -70,15 +66,11 @@ export async function POST(req: Request) {
       puzzle: savedPuzzle,
     });
   } catch (error) {
-    Logger.error("api", "Error generating puzzle", {
-      error: error instanceof Error ? error.message : "Unknown error occurred",
-    });
-
+    Logger.error("api", "Error generating puzzle", { error });
     return NextResponse.json(
       {
-        success: false,
         error:
-          error instanceof Error ? error.message : "Unknown error occurred",
+          error instanceof Error ? error.message : "Failed to generate puzzle",
       },
       { status: 500 }
     );

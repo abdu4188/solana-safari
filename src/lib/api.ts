@@ -161,24 +161,30 @@ const SOLANA_TERMS: SolanaTerm[] = [
 ];
 
 // Keep track of recently used words (last 3 puzzles worth)
-let recentlyUsedWords = new Set<string>();
+const recentlyUsedWords = new Set<string>();
 const MAX_RECENT_WORDS = 18; // 6 words per puzzle * 3 puzzles
+
+// Keep track of recently used quiz questions (last 10 quizzes)
+const recentlyUsedQuizzes = new Set<string>();
+const MAX_RECENT_QUIZZES = 10;
 
 export async function getRandomWord(): Promise<SolanaTerm> {
   // Filter out recently used words
-  const availableTerms = SOLANA_TERMS.filter(term => !recentlyUsedWords.has(term.term));
-  
+  const availableTerms = SOLANA_TERMS.filter(
+    (term) => !recentlyUsedWords.has(term.term)
+  );
+
   // If we're running low on available terms, clear half of the recent words
   if (availableTerms.length === 0) {
     const oldWords = Array.from(recentlyUsedWords);
-    oldWords.slice(0, Math.floor(oldWords.length / 2)).forEach(word => 
-      recentlyUsedWords.delete(word)
-    );
+    oldWords
+      .slice(0, Math.floor(oldWords.length / 2))
+      .forEach((word) => recentlyUsedWords.delete(word));
   }
 
   const randomIndex = Math.floor(Math.random() * availableTerms.length);
   const selectedTerm = availableTerms[randomIndex];
-  
+
   // Add new word to recently used set
   recentlyUsedWords.add(selectedTerm.term);
   if (recentlyUsedWords.size > MAX_RECENT_WORDS) {
@@ -191,14 +197,16 @@ export async function getRandomWord(): Promise<SolanaTerm> {
 
 export async function getRandomWords(count: number = 4): Promise<SolanaTerm[]> {
   // Filter out recently used words
-  const availableTerms = SOLANA_TERMS.filter(term => !recentlyUsedWords.has(term.term));
-  
+  const availableTerms = SOLANA_TERMS.filter(
+    (term) => !recentlyUsedWords.has(term.term)
+  );
+
   // If we're running low on available terms, clear half of the recent words
   if (availableTerms.length < count) {
     const oldWords = Array.from(recentlyUsedWords);
-    oldWords.slice(0, Math.floor(oldWords.length / 2)).forEach(word => 
-      recentlyUsedWords.delete(word)
-    );
+    oldWords
+      .slice(0, Math.floor(oldWords.length / 2))
+      .forEach((word) => recentlyUsedWords.delete(word));
   }
 
   // Get random words from available terms
@@ -206,7 +214,7 @@ export async function getRandomWords(count: number = 4): Promise<SolanaTerm[]> {
   const selectedTerms = shuffled.slice(0, count);
 
   // Add new words to recently used set
-  selectedTerms.forEach(term => {
+  selectedTerms.forEach((term) => {
     recentlyUsedWords.add(term.term);
     // Remove oldest words if we exceed the max
     if (recentlyUsedWords.size > MAX_RECENT_WORDS) {
@@ -237,10 +245,10 @@ export function generateWordSearchGrid(words: string[]): string[][] {
 
   words.forEach((word) => {
     const directions = [
-      { dx: 1, dy: 0 },   // horizontal
-      { dx: 0, dy: 1 },   // vertical
-      { dx: 1, dy: 1 },   // diagonal down-right
-      { dx: 1, dy: -1 },  // diagonal up-right
+      { dx: 1, dy: 0 }, // horizontal
+      { dx: 0, dy: 1 }, // vertical
+      { dx: 1, dy: 1 }, // diagonal down-right
+      { dx: 1, dy: -1 }, // diagonal up-right
     ];
     const direction = directions[Math.floor(Math.random() * directions.length)];
     let placed = false;
@@ -259,10 +267,7 @@ export function generateWordSearchGrid(words: string[]): string[][] {
         for (let i = 0; i < word.length; i++) {
           const newRow = row + i * direction.dy;
           const newCol = col + i * direction.dx;
-          if (
-            grid[newRow][newCol] !== "" &&
-            grid[newRow][newCol] !== word[i]
-          ) {
+          if (grid[newRow][newCol] !== "" && grid[newRow][newCol] !== word[i]) {
             canPlace = false;
             break;
           }
@@ -281,4 +286,26 @@ export function generateWordSearchGrid(words: string[]): string[][] {
   });
 
   return grid;
+}
+
+export async function trackQuizQuestion(
+  question: string,
+  answer: string
+): Promise<void> {
+  // Create a unique identifier for the question-answer pair
+  const quizId = `${question}:${answer}`;
+
+  // Add to recently used set
+  recentlyUsedQuizzes.add(quizId);
+
+  // Remove oldest if we exceed the max
+  if (recentlyUsedQuizzes.size > MAX_RECENT_QUIZZES) {
+    const oldestQuiz = Array.from(recentlyUsedQuizzes)[0];
+    recentlyUsedQuizzes.delete(oldestQuiz);
+  }
+}
+
+export function isQuizRecentlyUsed(question: string, answer: string): boolean {
+  const quizId = `${question}:${answer}`;
+  return recentlyUsedQuizzes.has(quizId);
 }
