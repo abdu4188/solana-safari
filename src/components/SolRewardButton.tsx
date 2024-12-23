@@ -121,7 +121,7 @@ export function SolRewardButton() {
 
   return (
     <div className="w-full space-y-2">
-      <div className="text-sm text-gray-600 text-center">
+      <div className="text-sm text-white text-center">
         {pointsNeeded > 0
           ? `${pointsNeeded} more points needed for ${SOL_REWARD_AMOUNT} SOL`
           : `Ready to process ${SOL_REWARD_AMOUNT} SOL reward!`}
@@ -134,7 +134,13 @@ export function SolRewardButton() {
           currentPoints < MIN_POINTS_FOR_SOL ||
           walletBalance < SOL_REWARD_AMOUNT
         }
-        className="w-full"
+        className={`w-full ${
+          isLoading ||
+          currentPoints < MIN_POINTS_FOR_SOL ||
+          walletBalance < SOL_REWARD_AMOUNT
+            ? "bg-gray-500 text-white"
+            : ""
+        }`}
       >
         {isLoading ? "Processing..." : "Process SOL Reward"}
       </Button>

@@ -118,7 +118,10 @@ export default function QuizPuzzle() {
   if (loading) {
     return (
       <div className="container mx-auto p-4 text-center">
-        <p>Loading quiz...</p>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-8 h-8 border-4 border-t-blue-500 border-r-transparent border-b-blue-500 border-l-transparent rounded-full animate-spin" />
+          <p className="text-lg font-medium text-muted-foreground animate-pulse">Loading quiz...</p>
+        </div>
       </div>
     );
   }

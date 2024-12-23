@@ -40,5 +40,5 @@ export function UserPoints() {
     return null;
   }
 
-  return <div className="text-sm text-gray-600">Points: {points}</div>;
+  return <div className="text-sm text-white">Points: {points}</div>;
 }
