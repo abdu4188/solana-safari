@@ -112,8 +112,16 @@ export default function AnagramPuzzle() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-4 text-center">
-        <p>Loading puzzle...</p>
+      <div className="container mx-auto p-8 flex flex-col items-center justify-center min-h-[400px]">
+        <div className="relative w-16 h-16 mb-4">
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-spin" style={{ animationDuration: '3s' }}></div>
+          <div className="absolute inset-1 bg-white rounded-full"></div>
+          <div className="absolute inset-3 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-pulse"></div>
+        </div>
+        <h2 className="text-xl font-semibold mb-2 animate-pulse">Generating Your Puzzle</h2>
+        <p className="text-muted-foreground text-center">
+          Our AI is crafting a unique word search experience...
+        </p>
       </div>
     );
   }
