@@ -34,7 +34,17 @@ export async function generatePuzzleWithAI(prompt: string) {
         {
           role: "system",
           content:
-            "You are a puzzle generator that creates educational puzzles about blockchain and cryptocurrency topics. For word search puzzles, generate a list of relevant words and create a grid with those words hidden in it. Words can be placed horizontally or vertically. Use the provided context to create accurate and engaging puzzles. Always respond with valid JSON that matches the requested structure exactly. For word search puzzles, include both the grid and words array in the response.",
+            "You are a puzzle generator that creates educational puzzles about blockchain and cryptocurrency topics. For word search puzzles:\n" +
+            "1. Generate a list of relevant words (max 6 words) and create a grid with those words hidden in it.\n" +
+            "2. Words can be placed horizontally, vertically, or diagonally.\n" +
+            "3. For each word, provide:\n" +
+            "   - A descriptive hint that teaches about the concept\n" +
+            "   - A partial word with some letters replaced by underscores (_)\n" +
+            "4. Make the grid more challenging by:\n" +
+            "   - Using a 10x10 grid\n" +
+            "   - Placing words in all directions\n" +
+            "   - Adding decoy letters strategically\n" +
+            "Use the provided context to create accurate and engaging puzzles. Always respond with valid JSON that matches the requested structure exactly. Include grid, words, hints, and partialWords arrays in the response.",
         },
         {
           role: "user",
@@ -42,7 +52,7 @@ export async function generatePuzzleWithAI(prompt: string) {
         },
       ],
       temperature: 0.7,
-      max_tokens: 1000,
+      max_tokens: 2000,
     });
 
     const puzzleContent = response.choices[0]?.message?.content;

@@ -6,27 +6,40 @@ import {
   Transaction,
 } from "@solana/web3.js";
 import { useState } from "react";
+import { GAME_TREASURY_KEY } from "@/lib/constants";
 
 export function useSolanaGame() {
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Function to reward player with SOL (for testing, use small amounts on devnet)
+  // Function to reward player with SOL
   const rewardPlayer = async (amount: number) => {
-    if (!publicKey) return;
+    if (!publicKey) {
+      throw new Error("Wallet not connected");
+    }
+
+    if (!GAME_TREASURY_KEY) {
+      throw new Error("Game treasury not configured. Please add NEXT_PUBLIC_GAME_TREASURY_KEY to your environment variables.");
+    }
 
     try {
       setIsLoading(true);
-      // For this example, we'll send from a game treasury account
-      // In production, you should use a proper game treasury with secure key management
-      const GAME_TREASURY = new PublicKey("YOUR_TREASURY_PUBLIC_KEY");
+      const treasuryPublicKey = new PublicKey(GAME_TREASURY_KEY);
+
+      // Check treasury balance
+      const treasuryBalance = await connection.getBalance(treasuryPublicKey);
+      const requiredAmount = amount * LAMPORTS_PER_SOL;
+
+      if (treasuryBalance < requiredAmount) {
+        throw new Error("Insufficient funds in treasury wallet");
+      }
 
       const transaction = new Transaction().add(
         SystemProgram.transfer({
-          fromPubkey: GAME_TREASURY,
+          fromPubkey: treasuryPublicKey,
           toPubkey: publicKey,
-          lamports: amount * LAMPORTS_PER_SOL,
+          lamports: requiredAmount,
         })
       );
 
@@ -54,11 +67,26 @@ export function useSolanaGame() {
     }
   };
 
+  // Function to check treasury balance
+  const getTreasuryBalance = async () => {
+    if (!GAME_TREASURY_KEY) return 0;
+    try {
+      const treasuryPublicKey = new PublicKey(GAME_TREASURY_KEY);
+      const balance = await connection.getBalance(treasuryPublicKey);
+      return balance / LAMPORTS_PER_SOL;
+    } catch (error) {
+      console.error("Error getting treasury balance:", error);
+      return 0;
+    }
+  };
+
   return {
     isLoading,
     rewardPlayer,
     getPlayerBalance,
+    getTreasuryBalance,
     isWalletConnected: !!publicKey,
     playerAddress: publicKey?.toString(),
+    isTreasuryConfigured: !!GAME_TREASURY_KEY,
   };
 }

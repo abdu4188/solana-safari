@@ -261,7 +261,7 @@ export default function WordSearchPuzzle() {
                         ? "secondary"
                         : "outline"
                     }
-                    className="w-10 h-10 p-0 font-bold"
+                    className="w-8 h-8 sm:w-10 sm:h-10 p-0 font-bold text-sm sm:text-base"
                     onClick={() => handleCellClick(rowIndex, colIndex)}
                   >
                     {letter}
@@ -297,18 +297,41 @@ export default function WordSearchPuzzle() {
           <Card className="p-4">
             <h2 className="text-xl font-semibold mb-4">Words to Find</h2>
             <div className="space-y-2">
-              {puzzle.words.map((word) => (
-                <div
-                  key={word}
-                  className={`p-2 rounded ${
-                    foundWords.includes(word)
-                      ? "bg-green-100 text-green-800"
-                      : "bg-gray-100 text-gray-800"
-                  }`}
-                >
-                  {word}
-                </div>
-              ))}
+              {puzzle.words.map((word, index) => {
+                // Show partial words for longer or more complex terms
+                const shouldShowPartial = word.length > 6;
+                const partialWord = shouldShowPartial 
+                  ? word.split('').map((char, i) => {
+                      // Show first letter, last letter, and some middle letters
+                      if (i === 0 || i === word.length - 1 || Math.random() < 0.3) {
+                        return char;
+                      }
+                      return '_';
+                    }).join('')
+                  : word.replace(/[A-Z]/g, '_');
+
+                return (
+                  <div
+                    key={word}
+                    className={`p-2 rounded ${
+                      foundWords.includes(word)
+                        ? "bg-green-100 text-green-800"
+                        : "bg-gray-100 text-gray-800"
+                    }`}
+                  >
+                    <div className="flex flex-col space-y-1">
+                      {foundWords.includes(word) ? (
+                        <span className="font-semibold">{word}</span>
+                      ) : (
+                        <>
+                          <span className="font-mono">{puzzle.partialWords?.[index] || partialWord}</span>
+                          <span className="text-sm text-gray-600">{puzzle.hints?.[index] || 'Find this word!'}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </Card>
         </div>

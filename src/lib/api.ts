@@ -160,14 +160,62 @@ const SOLANA_TERMS: SolanaTerm[] = [
   },
 ];
 
+// Keep track of recently used words (last 3 puzzles worth)
+let recentlyUsedWords = new Set<string>();
+const MAX_RECENT_WORDS = 18; // 6 words per puzzle * 3 puzzles
+
 export async function getRandomWord(): Promise<SolanaTerm> {
-  const randomIndex = Math.floor(Math.random() * SOLANA_TERMS.length);
-  return SOLANA_TERMS[randomIndex];
+  // Filter out recently used words
+  const availableTerms = SOLANA_TERMS.filter(term => !recentlyUsedWords.has(term.term));
+  
+  // If we're running low on available terms, clear half of the recent words
+  if (availableTerms.length === 0) {
+    const oldWords = Array.from(recentlyUsedWords);
+    oldWords.slice(0, Math.floor(oldWords.length / 2)).forEach(word => 
+      recentlyUsedWords.delete(word)
+    );
+  }
+
+  const randomIndex = Math.floor(Math.random() * availableTerms.length);
+  const selectedTerm = availableTerms[randomIndex];
+  
+  // Add new word to recently used set
+  recentlyUsedWords.add(selectedTerm.term);
+  if (recentlyUsedWords.size > MAX_RECENT_WORDS) {
+    const oldestWord = Array.from(recentlyUsedWords)[0];
+    recentlyUsedWords.delete(oldestWord);
+  }
+
+  return selectedTerm;
 }
 
 export async function getRandomWords(count: number = 4): Promise<SolanaTerm[]> {
-  const shuffled = [...SOLANA_TERMS].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
+  // Filter out recently used words
+  const availableTerms = SOLANA_TERMS.filter(term => !recentlyUsedWords.has(term.term));
+  
+  // If we're running low on available terms, clear half of the recent words
+  if (availableTerms.length < count) {
+    const oldWords = Array.from(recentlyUsedWords);
+    oldWords.slice(0, Math.floor(oldWords.length / 2)).forEach(word => 
+      recentlyUsedWords.delete(word)
+    );
+  }
+
+  // Get random words from available terms
+  const shuffled = [...availableTerms].sort(() => 0.5 - Math.random());
+  const selectedTerms = shuffled.slice(0, count);
+
+  // Add new words to recently used set
+  selectedTerms.forEach(term => {
+    recentlyUsedWords.add(term.term);
+    // Remove oldest words if we exceed the max
+    if (recentlyUsedWords.size > MAX_RECENT_WORDS) {
+      const oldestWord = Array.from(recentlyUsedWords)[0];
+      recentlyUsedWords.delete(oldestWord);
+    }
+  });
+
+  return selectedTerms;
 }
 
 export function scrambleWord(word: string): string {
@@ -188,7 +236,13 @@ export function generateWordSearchGrid(words: string[]): string[][] {
     );
 
   words.forEach((word) => {
-    const direction = Math.random() < 0.5 ? "horizontal" : "vertical";
+    const directions = [
+      { dx: 1, dy: 0 },   // horizontal
+      { dx: 0, dy: 1 },   // vertical
+      { dx: 1, dy: 1 },   // diagonal down-right
+      { dx: 1, dy: -1 },  // diagonal up-right
+    ];
+    const direction = directions[Math.floor(Math.random() * directions.length)];
     let placed = false;
     let attempts = 0;
 
@@ -196,31 +250,28 @@ export function generateWordSearchGrid(words: string[]): string[][] {
       const row = Math.floor(Math.random() * size);
       const col = Math.floor(Math.random() * size);
 
-      if (direction === "horizontal" && col + word.length <= size) {
+      if (
+        col + word.length * direction.dx <= size &&
+        row + word.length * direction.dy <= size &&
+        row + word.length * direction.dy >= 0
+      ) {
         let canPlace = true;
         for (let i = 0; i < word.length; i++) {
-          if (grid[row][col + i] !== "" && grid[row][col + i] !== word[i]) {
+          const newRow = row + i * direction.dy;
+          const newCol = col + i * direction.dx;
+          if (
+            grid[newRow][newCol] !== "" &&
+            grid[newRow][newCol] !== word[i]
+          ) {
             canPlace = false;
             break;
           }
         }
         if (canPlace) {
           for (let i = 0; i < word.length; i++) {
-            grid[row][col + i] = word[i].toUpperCase();
-          }
-          placed = true;
-        }
-      } else if (direction === "vertical" && row + word.length <= size) {
-        let canPlace = true;
-        for (let i = 0; i < word.length; i++) {
-          if (grid[row + i][col] !== "" && grid[row + i][col] !== word[i]) {
-            canPlace = false;
-            break;
-          }
-        }
-        if (canPlace) {
-          for (let i = 0; i < word.length; i++) {
-            grid[row + i][col] = word[i].toUpperCase();
+            const newRow = row + i * direction.dy;
+            const newCol = col + i * direction.dx;
+            grid[newRow][newCol] = word[i].toUpperCase();
           }
           placed = true;
         }
