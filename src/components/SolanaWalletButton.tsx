@@ -5,6 +5,7 @@ import { useSolanaGame } from "../hooks/useSolanaGame";
 import { useEffect, useState } from "react";
 import { UserPoints } from "./UserPoints";
 import { onPointsUpdated } from "@/lib/events";
+import { SolRewardButton } from "./SolRewardButton";
 
 export function SolanaWalletButton() {
   const { isWalletConnected, getPlayerBalance } = useSolanaGame();
@@ -46,6 +47,7 @@ export function SolanaWalletButton() {
             Balance: {balance.toFixed(4)} SOL
           </div>
           <UserPoints />
+          <SolRewardButton />
         </div>
       )}
     </div>

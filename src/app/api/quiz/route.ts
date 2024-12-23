@@ -70,7 +70,7 @@ Format your response as JSON with this structure:
     const savedPuzzle = await savePuzzle(
       gameId,
       quiz,
-      "trivia",
+      "quiz",
       quiz.difficulty,
       relevantContent
     );

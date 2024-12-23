@@ -1,10 +1,5 @@
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import {
-  LAMPORTS_PER_SOL,
-  PublicKey,
-  SystemProgram,
-  Transaction,
-} from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, SystemProgram, Transaction } from "@solana/web3.js";
 import { useState } from "react";
 
 export function useSolanaGame() {
@@ -12,21 +7,29 @@ export function useSolanaGame() {
   const { publicKey, sendTransaction } = useWallet();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Function to reward player with SOL (for testing, use small amounts on devnet)
+  // Function to reward player with SOL
   const rewardPlayer = async (amount: number) => {
-    if (!publicKey) return;
+    if (!publicKey) {
+      throw new Error("Wallet not connected");
+    }
 
     try {
       setIsLoading(true);
-      // For this example, we'll send from a game treasury account
-      // In production, you should use a proper game treasury with secure key management
-      const GAME_TREASURY = new PublicKey("YOUR_TREASURY_PUBLIC_KEY");
 
+      // Check wallet balance
+      const walletBalance = await connection.getBalance(publicKey);
+      const requiredAmount = amount * LAMPORTS_PER_SOL;
+
+      if (walletBalance < requiredAmount) {
+        throw new Error("Insufficient funds in your wallet");
+      }
+
+      // Create a transaction to send SOL to yourself (this will be used to track rewards)
       const transaction = new Transaction().add(
         SystemProgram.transfer({
-          fromPubkey: GAME_TREASURY,
+          fromPubkey: publicKey,
           toPubkey: publicKey,
-          lamports: amount * LAMPORTS_PER_SOL,
+          lamports: requiredAmount,
         })
       );
 

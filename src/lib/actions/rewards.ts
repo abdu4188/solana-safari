@@ -61,3 +61,30 @@ export const getUserPoints = async (userId: string) => {
     return 0;
   }
 };
+
+export const resetPoints = async (userId: string, currentPoints: number) => {
+  try {
+    // Add a negative reward to reset points to 0
+    const [reward] = await db
+      .insert(rewards)
+      .values({
+        userId,
+        tokenType: "points",
+        tokenAmount: -currentPoints,
+        reason: "Points reset after SOL reward claim",
+        metadata: {},
+      })
+      .returning();
+
+    // Emit event for client-side updates
+    emitPointsUpdated();
+
+    return { success: true, reward };
+  } catch (error) {
+    console.error("Error resetting points:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to reset points",
+    };
+  }
+};

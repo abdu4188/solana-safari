@@ -16,6 +16,7 @@ export interface WordSearchPuzzle extends Puzzle {
   type: "wordsearch";
   grid: string[][];
   words: string[];
+  partialWords?: string[];
 }
 
 export interface AnagramPuzzle extends Puzzle {

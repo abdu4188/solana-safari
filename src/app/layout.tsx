@@ -5,12 +5,14 @@ import { cn } from "@/lib/utils";
 import { SolanaProvider } from "@/components/SolanaProvider";
 import { SolanaWalletButton } from "@/components/SolanaWalletButton";
 import { ClerkProvider } from "@clerk/nextjs";
+import Image from "next/image";
+import Link from "next/link";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Crypto Word Puzzle",
-  description: "Solve crypto-related puzzles and earn rewards",
+  title: "Sol Quest: Learn & Earn on the Solana Blockchain",
+  description: "Embark on an exciting journey into the Solana ecosystem with Sol Quest! Our gamified learning platform makes mastering Solana fun and rewarding. Learn about blockchain technology, DeFi, NFTs, and more while earning rewards along the way.",
 };
 
 export default function RootLayout({
@@ -29,7 +31,16 @@ export default function RootLayout({
         <ClerkProvider>
           <SolanaProvider>
             <div className="container mx-auto p-4">
-              <div className="flex justify-end mb-4">
+              <div className="flex justify-between items-center mb-4">
+                <Link href="/" className="flex items-center">
+                  <Image
+                    src="/logo.svg"
+                    alt="Crypto Word Puzzle"
+                    width={300}
+                    height={300}
+                    className="dark:invert"
+                  />
+                </Link>
                 <SolanaWalletButton />
               </div>
               <main>{children}</main>

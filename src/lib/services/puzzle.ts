@@ -6,7 +6,7 @@ import { z } from "zod";
 export const generatePuzzleSchema = z.object({
   topic: z.string().min(1),
   difficulty: z.enum(["easy", "medium", "hard"]),
-  type: z.enum(["wordsearch", "trivia", "riddle", "anagram"]),
+  type: z.enum(["wordsearch", "quiz", "riddle", "anagram"]),
   gameId: z.number(),
 });
 
@@ -36,12 +36,30 @@ interface WordSearchMetadata {
   words?: string[];
 }
 
+export interface PuzzleStructure {
+  title: string;
+  content: string;
+  solution: string;
+  hints: string[];
+  points: number;
+  timeLimit: number;
+  metadata: {
+    category: PuzzleInput["type"];
+    topic: string;
+    sourceContent: string[];
+  };
+  grid?: string[][];
+  words?: string[];
+  preSelectedWords?: string[];
+  additionalMetadata?: Record<string, unknown>;
+}
+
 export function generatePuzzlePrompt(
   type: PuzzleInput["type"],
   topic: string,
   difficulty: PuzzleInput["difficulty"],
   context: string
-): string {
+): { structure: PuzzleStructure; prompt: string } {
   const baseStructure = {
     title: "A catchy title for the puzzle",
     content: "The puzzle content",
@@ -65,8 +83,9 @@ export function generatePuzzlePrompt(
         ["C", "D"],
       ], // Example grid structure
       words: ["WORD1", "WORD2"], // Example words to find
+      preSelectedWords: [], // Pre-selected words from our tracking system
     },
-    trivia: {
+    quiz: {
       content: "The trivia question with multiple choice options (A, B, C, D)",
       timeLimit: 60,
       additionalMetadata: {
@@ -132,7 +151,7 @@ Make sure to:
 `
       : "";
 
-  return `Use the following context about "${topic}" to create a ${difficulty} ${type}:
+  const prompt = `Use the following context about "${topic}" to create a ${difficulty} ${type}:
 
 Context:
 ${context}
@@ -140,6 +159,8 @@ ${context}
 ${anagramInstructions}
 Format the response as JSON with the following structure:
 ${JSON.stringify(structure, null, 2)}`;
+
+  return { structure, prompt };
 }
 
 export async function savePuzzle(
