@@ -37,7 +37,7 @@ dependencies:
     version: 0.9.35(@solana/web3.js@1.98.0)(bs58@4.0.1)(react-dom@19.0.0)(react-native@0.76.5)(react@19.0.0)
   '@solana/wallet-adapter-wallets':
     specifier: ^0.19.32
-    version: 0.19.32(@babel/core@7.26.0)(@babel/runtime@7.26.0)(@solana/web3.js@1.98.0)(bs58@4.0.1)(fastestsmallesttextencoderdecoder@1.0.22)(react-dom@19.0.0)(react-native@0.76.5)(react@19.0.0)(tslib@2.8.1)(typescript@5.7.2)(ws@7.5.10)
+    version: 0.19.32(@babel/core@7.26.0)(@babel/runtime@7.26.0)(@solana/web3.js@1.98.0)(@vercel/kv@3.0.0)(bs58@4.0.1)(fastestsmallesttextencoderdecoder@1.0.22)(react-dom@19.0.0)(react-native@0.76.5)(react@19.0.0)(tslib@2.8.1)(typescript@5.7.2)(ws@8.18.0)
   '@solana/web3.js':
     specifier: ^1.98.0
     version: 1.98.0
@@ -47,6 +47,9 @@ dependencies:
   '@types/cheerio':
     specifier: ^0.22.35
     version: 0.22.35
+  '@vercel/kv':
+    specifier: ^3.0.0
+    version: 3.0.0
   ai:
     specifier: ^4.0.21
     version: 4.0.21(react@19.0.0)(zod@3.24.1)
@@ -2975,15 +2978,15 @@ packages:
       chalk: 4.1.2
     dev: false
 
-  /@jnwng/walletconnect-solana@0.2.0(@solana/web3.js@1.98.0):
+  /@jnwng/walletconnect-solana@0.2.0(@solana/web3.js@1.98.0)(@vercel/kv@3.0.0):
     resolution: {integrity: sha512-nyRq0xLEj9i2J4UXQ0Mr4KzsooTMbLu0ewHOqdQV7iZE0PfbtKa8poTSF4ZBAQD8hoMHEx+I7zGFCNMI9BTrTA==}
     peerDependencies:
       '@solana/web3.js': ^1.63.0
     dependencies:
       '@solana/web3.js': 1.98.0
       '@walletconnect/qrcode-modal': 1.8.0
-      '@walletconnect/sign-client': 2.17.3
-      '@walletconnect/utils': 2.17.3
+      '@walletconnect/sign-client': 2.17.3(@vercel/kv@3.0.0)
+      '@walletconnect/utils': 2.17.3(@vercel/kv@3.0.0)
       bs58: 5.0.0
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -4549,21 +4552,6 @@ packages:
       - fastestsmallesttextencoderdecoder
     dev: false
 
-  /@solana/rpc-subscriptions-channel-websocket@2.0.0(typescript@5.7.2)(ws@7.5.10):
-    resolution: {integrity: sha512-hSQDZBmcp2t+gLZsSBqs/SqVw4RuNSC7njiP46azyzW7oGg8X2YPV36AHGsHD12KPsc0UpT1OAZ4+AN9meVKww==}
-    engines: {node: '>=20.18.0'}
-    peerDependencies:
-      typescript: '>=5'
-      ws: ^8.18.0
-    dependencies:
-      '@solana/errors': 2.0.0(typescript@5.7.2)
-      '@solana/functional': 2.0.0(typescript@5.7.2)
-      '@solana/rpc-subscriptions-spec': 2.0.0(typescript@5.7.2)
-      '@solana/subscribable': 2.0.0(typescript@5.7.2)
-      typescript: 5.7.2
-      ws: 7.5.10
-    dev: false
-
   /@solana/rpc-subscriptions-channel-websocket@2.0.0(typescript@5.7.2)(ws@8.18.0):
     resolution: {integrity: sha512-hSQDZBmcp2t+gLZsSBqs/SqVw4RuNSC7njiP46azyzW7oGg8X2YPV36AHGsHD12KPsc0UpT1OAZ4+AN9meVKww==}
     engines: {node: '>=20.18.0'}
@@ -4590,29 +4578,6 @@ packages:
       '@solana/rpc-spec-types': 2.0.0(typescript@5.7.2)
       '@solana/subscribable': 2.0.0(typescript@5.7.2)
       typescript: 5.7.2
-    dev: false
-
-  /@solana/rpc-subscriptions@2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)(ws@7.5.10):
-    resolution: {integrity: sha512-AdwMJHMrhlj7q1MPjZmVcKq3iLqMW3N0MT8kzIAP2vP+8o/d6Fn4aqGxoz2Hlfn3OYIZoYStN2VBtwzbcfEgMA==}
-    engines: {node: '>=20.18.0'}
-    peerDependencies:
-      typescript: '>=5'
-    dependencies:
-      '@solana/errors': 2.0.0(typescript@5.7.2)
-      '@solana/fast-stable-stringify': 2.0.0(typescript@5.7.2)
-      '@solana/functional': 2.0.0(typescript@5.7.2)
-      '@solana/promises': 2.0.0(typescript@5.7.2)
-      '@solana/rpc-spec-types': 2.0.0(typescript@5.7.2)
-      '@solana/rpc-subscriptions-api': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)
-      '@solana/rpc-subscriptions-channel-websocket': 2.0.0(typescript@5.7.2)(ws@7.5.10)
-      '@solana/rpc-subscriptions-spec': 2.0.0(typescript@5.7.2)
-      '@solana/rpc-transformers': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)
-      '@solana/rpc-types': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)
-      '@solana/subscribable': 2.0.0(typescript@5.7.2)
-      typescript: 5.7.2
-    transitivePeerDependencies:
-      - fastestsmallesttextencoderdecoder
-      - ws
     dev: false
 
   /@solana/rpc-subscriptions@2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)(ws@8.18.0):
@@ -4743,28 +4708,6 @@ packages:
       typescript: 5.7.2
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
-    dev: false
-
-  /@solana/transaction-confirmation@2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)(ws@7.5.10):
-    resolution: {integrity: sha512-JkTw5gXLiqQjf6xK0fpVcoJ/aMp2kagtFSD/BAOazdJ3UYzOzbzqvECt6uWa3ConcMswQ2vXalVtI7ZjmYuIeg==}
-    engines: {node: '>=20.18.0'}
-    peerDependencies:
-      typescript: '>=5'
-    dependencies:
-      '@solana/addresses': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)
-      '@solana/codecs-strings': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)
-      '@solana/errors': 2.0.0(typescript@5.7.2)
-      '@solana/keys': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)
-      '@solana/promises': 2.0.0(typescript@5.7.2)
-      '@solana/rpc': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)
-      '@solana/rpc-subscriptions': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)(ws@7.5.10)
-      '@solana/rpc-types': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)
-      '@solana/transaction-messages': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)
-      '@solana/transactions': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)
-      typescript: 5.7.2
-    transitivePeerDependencies:
-      - fastestsmallesttextencoderdecoder
-      - ws
     dev: false
 
   /@solana/transaction-confirmation@2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)(ws@8.18.0):
@@ -5238,7 +5181,7 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@solana/wallet-adapter-trezor@0.1.2(@babel/core@7.26.0)(@solana/web3.js@1.98.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.76.5)(tslib@2.8.1)(typescript@5.7.2)(ws@7.5.10):
+  /@solana/wallet-adapter-trezor@0.1.2(@babel/core@7.26.0)(@solana/web3.js@1.98.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.76.5)(tslib@2.8.1)(typescript@5.7.2)(ws@8.18.0):
     resolution: {integrity: sha512-x4nXntYi1SIv63ZdXWX/Rq/VKwguByKu67WpyUXsu8kOdviksb20bQMuAR7Ue41oJ9zSnLlTxAxA1SuWNkFRBg==}
     engines: {node: '>=16'}
     peerDependencies:
@@ -5246,7 +5189,7 @@ packages:
     dependencies:
       '@solana/wallet-adapter-base': 0.9.23(@solana/web3.js@1.98.0)
       '@solana/web3.js': 1.98.0
-      '@trezor/connect-web': 9.4.7(@babel/core@7.26.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.76.5)(tslib@2.8.1)(typescript@5.7.2)(ws@7.5.10)
+      '@trezor/connect-web': 9.4.7(@babel/core@7.26.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.76.5)(tslib@2.8.1)(typescript@5.7.2)(ws@8.18.0)
       buffer: 6.0.3
     transitivePeerDependencies:
       - '@babel/core'
@@ -5286,13 +5229,13 @@ packages:
       '@solana/web3.js': 1.98.0
     dev: false
 
-  /@solana/wallet-adapter-walletconnect@0.1.16(@solana/web3.js@1.98.0):
+  /@solana/wallet-adapter-walletconnect@0.1.16(@solana/web3.js@1.98.0)(@vercel/kv@3.0.0):
     resolution: {integrity: sha512-jNaQwSho8hT7gF1ifePE8TJc1FULx8jCF16KX3fZPtzXDxKrj0R4VUpHMGcw4MlDknrnZNLOJAVvyiawAkPCRQ==}
     engines: {node: '>=16'}
     peerDependencies:
       '@solana/web3.js': ^1.77.3
     dependencies:
-      '@jnwng/walletconnect-solana': 0.2.0(@solana/web3.js@1.98.0)
+      '@jnwng/walletconnect-solana': 0.2.0(@solana/web3.js@1.98.0)(@vercel/kv@3.0.0)
       '@solana/wallet-adapter-base': 0.9.23(@solana/web3.js@1.98.0)
       '@solana/web3.js': 1.98.0
     transitivePeerDependencies:
@@ -5318,7 +5261,7 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@solana/wallet-adapter-wallets@0.19.32(@babel/core@7.26.0)(@babel/runtime@7.26.0)(@solana/web3.js@1.98.0)(bs58@4.0.1)(fastestsmallesttextencoderdecoder@1.0.22)(react-dom@19.0.0)(react-native@0.76.5)(react@19.0.0)(tslib@2.8.1)(typescript@5.7.2)(ws@7.5.10):
+  /@solana/wallet-adapter-wallets@0.19.32(@babel/core@7.26.0)(@babel/runtime@7.26.0)(@solana/web3.js@1.98.0)(@vercel/kv@3.0.0)(bs58@4.0.1)(fastestsmallesttextencoderdecoder@1.0.22)(react-dom@19.0.0)(react-native@0.76.5)(react@19.0.0)(tslib@2.8.1)(typescript@5.7.2)(ws@8.18.0):
     resolution: {integrity: sha512-voZYQiIy1yXuKvm7x7YpnQ53eiJC7NpIYSQjzApOUiswiBRVeYcnPO4O/MMPUwsGkS7iZKqKZjo5CnOaN44n+g==}
     engines: {node: '>=16'}
     peerDependencies:
@@ -5355,10 +5298,10 @@ packages:
       '@solana/wallet-adapter-tokenary': 0.1.12(@solana/web3.js@1.98.0)
       '@solana/wallet-adapter-tokenpocket': 0.4.19(@solana/web3.js@1.98.0)
       '@solana/wallet-adapter-torus': 0.11.28(@babel/runtime@7.26.0)(@solana/web3.js@1.98.0)
-      '@solana/wallet-adapter-trezor': 0.1.2(@babel/core@7.26.0)(@solana/web3.js@1.98.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.76.5)(tslib@2.8.1)(typescript@5.7.2)(ws@7.5.10)
+      '@solana/wallet-adapter-trezor': 0.1.2(@babel/core@7.26.0)(@solana/web3.js@1.98.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.76.5)(tslib@2.8.1)(typescript@5.7.2)(ws@8.18.0)
       '@solana/wallet-adapter-trust': 0.1.13(@solana/web3.js@1.98.0)
       '@solana/wallet-adapter-unsafe-burner': 0.1.7(@solana/web3.js@1.98.0)
-      '@solana/wallet-adapter-walletconnect': 0.1.16(@solana/web3.js@1.98.0)
+      '@solana/wallet-adapter-walletconnect': 0.1.16(@solana/web3.js@1.98.0)(@vercel/kv@3.0.0)
       '@solana/wallet-adapter-xdefi': 0.1.7(@solana/web3.js@1.98.0)
       '@solana/web3.js': 1.98.0
     transitivePeerDependencies:
@@ -5562,36 +5505,6 @@ packages:
       - bufferutil
       - encoding
       - utf-8-validate
-    dev: false
-
-  /@solana/web3.js@2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)(ws@7.5.10):
-    resolution: {integrity: sha512-x+ZRB2/r5tVK/xw8QRbAfgPcX51G9f2ifEyAQ/J5npOO+6+MPeeCjtr5UxHNDAYs9Ypo0PN+YJATCO4vhzQJGg==}
-    engines: {node: '>=20.18.0'}
-    peerDependencies:
-      typescript: '>=5'
-    dependencies:
-      '@solana/accounts': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)
-      '@solana/addresses': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)
-      '@solana/codecs': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)
-      '@solana/errors': 2.0.0(typescript@5.7.2)
-      '@solana/functional': 2.0.0(typescript@5.7.2)
-      '@solana/instructions': 2.0.0(typescript@5.7.2)
-      '@solana/keys': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)
-      '@solana/programs': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)
-      '@solana/rpc': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)
-      '@solana/rpc-parsed-types': 2.0.0(typescript@5.7.2)
-      '@solana/rpc-spec-types': 2.0.0(typescript@5.7.2)
-      '@solana/rpc-subscriptions': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)(ws@7.5.10)
-      '@solana/rpc-types': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)
-      '@solana/signers': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)
-      '@solana/sysvars': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)
-      '@solana/transaction-confirmation': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)(ws@7.5.10)
-      '@solana/transaction-messages': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)
-      '@solana/transactions': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)
-      typescript: 5.7.2
-    transitivePeerDependencies:
-      - fastestsmallesttextencoderdecoder
-      - ws
     dev: false
 
   /@solana/web3.js@2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)(ws@8.18.0):
@@ -5977,21 +5890,6 @@ packages:
       - react-native
     dev: false
 
-  /@trezor/blockchain-link-types@1.2.5(fastestsmallesttextencoderdecoder@1.0.22)(tslib@2.8.1)(typescript@5.7.2)(ws@7.5.10):
-    resolution: {integrity: sha512-aGxLNGxhQqre4cCYDboy1s1gHAi92tTszLYl3GMhGmtB6EuAl049eO8ngCcMcuOZLTvFYA/1e/3mZoPIMBkeng==}
-    peerDependencies:
-      tslib: ^2.6.2
-    dependencies:
-      '@solana/web3.js': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.2)(ws@7.5.10)
-      '@trezor/type-utils': 1.1.4
-      '@trezor/utxo-lib': 2.2.6(tslib@2.8.1)
-      tslib: 2.8.1
-    transitivePeerDependencies:
-      - fastestsmallesttextencoderdecoder
-      - typescript
-      - ws
-    dev: false
-
   /@trezor/blockchain-link-types@1.2.5(fastestsmallesttextencoderdecoder@1.0.22)(tslib@2.8.1)(typescript@5.7.2)(ws@8.18.0):
     resolution: {integrity: sha512-aGxLNGxhQqre4cCYDboy1s1gHAi92tTszLYl3GMhGmtB6EuAl049eO8ngCcMcuOZLTvFYA/1e/3mZoPIMBkeng==}
     peerDependencies:
@@ -6078,12 +5976,12 @@ packages:
       - react-native
     dev: false
 
-  /@trezor/connect-web@9.4.7(@babel/core@7.26.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.76.5)(tslib@2.8.1)(typescript@5.7.2)(ws@7.5.10):
+  /@trezor/connect-web@9.4.7(@babel/core@7.26.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.76.5)(tslib@2.8.1)(typescript@5.7.2)(ws@8.18.0):
     resolution: {integrity: sha512-mICiGnw1xt60LbELZd2OId+nXGG/NAiywQIXGp5rOY6116I/sqJMw4fuKQrkGJ5zpKzzX/G7Be9GcshICD1ZDg==}
     peerDependencies:
       tslib: ^2.6.2
     dependencies:
-      '@trezor/connect': 9.4.7(@babel/core@7.26.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.76.5)(tslib@2.8.1)(typescript@5.7.2)(ws@7.5.10)
+      '@trezor/connect': 9.4.7(@babel/core@7.26.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.76.5)(tslib@2.8.1)(typescript@5.7.2)(ws@8.18.0)
       '@trezor/connect-common': 0.2.7(react-native@0.76.5)(tslib@2.8.1)
       '@trezor/utils': 9.2.6(tslib@2.8.1)
       tslib: 2.8.1
@@ -6101,7 +5999,7 @@ packages:
       - ws
     dev: false
 
-  /@trezor/connect@9.4.7(@babel/core@7.26.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.76.5)(tslib@2.8.1)(typescript@5.7.2)(ws@7.5.10):
+  /@trezor/connect@9.4.7(@babel/core@7.26.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.76.5)(tslib@2.8.1)(typescript@5.7.2)(ws@8.18.0):
     resolution: {integrity: sha512-Ky8AMWxhq0ieOCNgZtaIKTQie5qaQjK3uuv+TriUZXuxDqSoJcD8T50TAEY1Lxo1xl8Yv3wT0m6LQkmBn3T+xQ==}
     peerDependencies:
       tslib: ^2.6.2
@@ -6111,7 +6009,7 @@ packages:
       '@ethereumjs/tx': 5.4.0
       '@fivebinaries/coin-selection': 2.2.1
       '@trezor/blockchain-link': 2.3.6(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.76.5)(tslib@2.8.1)(typescript@5.7.2)
-      '@trezor/blockchain-link-types': 1.2.5(fastestsmallesttextencoderdecoder@1.0.22)(tslib@2.8.1)(typescript@5.7.2)(ws@7.5.10)
+      '@trezor/blockchain-link-types': 1.2.5(fastestsmallesttextencoderdecoder@1.0.22)(tslib@2.8.1)(typescript@5.7.2)(ws@8.18.0)
       '@trezor/connect-analytics': 1.2.4(react-native@0.76.5)(tslib@2.8.1)
       '@trezor/connect-common': 0.2.7(react-native@0.76.5)(tslib@2.8.1)
       '@trezor/protobuf': 1.2.6(tslib@2.8.1)
@@ -6545,6 +6443,19 @@ packages:
       eslint-visitor-keys: 4.2.0
     dev: true
 
+  /@upstash/redis@1.34.3:
+    resolution: {integrity: sha512-VT25TyODGy/8ljl7GADnJoMmtmJ1F8d84UXfGonRRF8fWYJz7+2J6GzW+a6ETGtk4OyuRTt7FRSvFG5GvrfSdQ==}
+    dependencies:
+      crypto-js: 4.2.0
+    dev: false
+
+  /@vercel/kv@3.0.0:
+    resolution: {integrity: sha512-pKT8fRnfyYk2MgvyB6fn6ipJPCdfZwiKDdw7vB+HL50rjboEBHDVBEcnwfkEpVSp2AjNtoaOUH7zG+bVC/rvSg==}
+    engines: {node: '>=14.6'}
+    dependencies:
+      '@upstash/redis': 1.34.3
+    dev: false
+
   /@wallet-standard/app@1.1.0:
     resolution: {integrity: sha512-3CijvrO9utx598kjr45hTbbeeykQrQfKmSnxeWOgU25TOEpvcipD/bYDQWIqUv1Oc6KK4YStokSMu/FBNecGUQ==}
     engines: {node: '>=16'}
@@ -6601,7 +6512,7 @@ packages:
       detect-browser: 5.2.0
     dev: false
 
-  /@walletconnect/core@2.17.3:
+  /@walletconnect/core@2.17.3(@vercel/kv@3.0.0):
     resolution: {integrity: sha512-57uv0FW4L6H/tmkb1kS2nG41MDguyDgZbGR58nkDUd1TO/HydyiTByVOhFzIxgN331cnY/1G1rMaKqncgdnOFA==}
     engines: {node: '>=18'}
     dependencies:
@@ -6610,14 +6521,14 @@ packages:
       '@walletconnect/jsonrpc-types': 1.0.4
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/jsonrpc-ws-connection': 1.0.16
-      '@walletconnect/keyvaluestorage': 1.1.1
+      '@walletconnect/keyvaluestorage': 1.1.1(@vercel/kv@3.0.0)
       '@walletconnect/logger': 2.1.2
       '@walletconnect/relay-api': 1.0.11
       '@walletconnect/relay-auth': 1.0.4
       '@walletconnect/safe-json': 1.0.2
       '@walletconnect/time': 1.0.2
-      '@walletconnect/types': 2.17.3
-      '@walletconnect/utils': 2.17.3
+      '@walletconnect/types': 2.17.3(@vercel/kv@3.0.0)
+      '@walletconnect/utils': 2.17.3(@vercel/kv@3.0.0)
       '@walletconnect/window-getters': 1.0.1
       events: 3.3.0
       lodash.isequal: 4.5.0
@@ -6701,7 +6612,7 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@walletconnect/keyvaluestorage@1.1.1:
+  /@walletconnect/keyvaluestorage@1.1.1(@vercel/kv@3.0.0):
     resolution: {integrity: sha512-V7ZQq2+mSxAq7MrRqDxanTzu2RcElfK1PfNYiaVnJgJ7Q7G7hTVwF8voIBx92qsRyGHZihrwNPHuZd1aKkd0rA==}
     peerDependencies:
       '@react-native-async-storage/async-storage': 1.x
@@ -6711,7 +6622,7 @@ packages:
     dependencies:
       '@walletconnect/safe-json': 1.0.2
       idb-keyval: 6.2.1
-      unstorage: 1.14.1(idb-keyval@6.2.1)
+      unstorage: 1.14.1(@vercel/kv@3.0.0)(idb-keyval@6.2.1)
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
@@ -6783,17 +6694,17 @@ packages:
       tslib: 1.14.1
     dev: false
 
-  /@walletconnect/sign-client@2.17.3:
+  /@walletconnect/sign-client@2.17.3(@vercel/kv@3.0.0):
     resolution: {integrity: sha512-OzOWxRTfVGCHU3OOF6ibPkgPfDpivFJjuknfcOUt9PYWpTAv6YKOmT4cyfBPhc7llruyHpV44fYbykMcLIvEcg==}
     dependencies:
-      '@walletconnect/core': 2.17.3
+      '@walletconnect/core': 2.17.3(@vercel/kv@3.0.0)
       '@walletconnect/events': 1.0.1
       '@walletconnect/heartbeat': 1.2.2
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/logger': 2.1.2
       '@walletconnect/time': 1.0.2
-      '@walletconnect/types': 2.17.3
-      '@walletconnect/utils': 2.17.3
+      '@walletconnect/types': 2.17.3(@vercel/kv@3.0.0)
+      '@walletconnect/utils': 2.17.3(@vercel/kv@3.0.0)
       events: 3.3.0
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -6829,13 +6740,13 @@ packages:
     deprecated: 'WalletConnect''s v1 SDKs are now deprecated. Please upgrade to a v2 SDK. For details see: https://docs.walletconnect.com/'
     dev: false
 
-  /@walletconnect/types@2.17.3:
+  /@walletconnect/types@2.17.3(@vercel/kv@3.0.0):
     resolution: {integrity: sha512-5eFxnbZGJJx0IQyCS99qz+OvozpLJJYfVG96dEHGgbzZMd+C9V1eitYqVClx26uX6V+WQVqVwjpD2Dyzie++Wg==}
     dependencies:
       '@walletconnect/events': 1.0.1
       '@walletconnect/heartbeat': 1.2.2
       '@walletconnect/jsonrpc-types': 1.0.4
-      '@walletconnect/keyvaluestorage': 1.1.1
+      '@walletconnect/keyvaluestorage': 1.1.1(@vercel/kv@3.0.0)
       '@walletconnect/logger': 2.1.2
       events: 3.3.0
     transitivePeerDependencies:
@@ -6859,7 +6770,7 @@ packages:
       - uploadthing
     dev: false
 
-  /@walletconnect/utils@2.17.3:
+  /@walletconnect/utils@2.17.3(@vercel/kv@3.0.0):
     resolution: {integrity: sha512-tG77UpZNeLYgeOwViwWnifpyBatkPlpKSSayhN0gcjY1lZAUNqtYslpm4AdTxlrA3pL61MnyybXgWYT5eZjarw==}
     dependencies:
       '@ethersproject/hash': 5.7.0
@@ -6870,12 +6781,12 @@ packages:
       '@stablelib/sha256': 1.0.1
       '@stablelib/x25519': 1.0.3
       '@walletconnect/jsonrpc-utils': 1.0.8
-      '@walletconnect/keyvaluestorage': 1.1.1
+      '@walletconnect/keyvaluestorage': 1.1.1(@vercel/kv@3.0.0)
       '@walletconnect/relay-api': 1.0.11
       '@walletconnect/relay-auth': 1.0.4
       '@walletconnect/safe-json': 1.0.2
       '@walletconnect/time': 1.0.2
-      '@walletconnect/types': 2.17.3
+      '@walletconnect/types': 2.17.3(@vercel/kv@3.0.0)
       '@walletconnect/window-getters': 1.0.1
       '@walletconnect/window-metadata': 1.0.1
       detect-browser: 5.3.0
@@ -13620,7 +13531,7 @@ packages:
     engines: {node: '>= 0.8'}
     dev: false
 
-  /unstorage@1.14.1(idb-keyval@6.2.1):
+  /unstorage@1.14.1(@vercel/kv@3.0.0)(idb-keyval@6.2.1):
     resolution: {integrity: sha512-0MBKpoVhNLL/Ixvue9lIsrHkwwWW9/f3TRftsYu1R7nZJJyHSdgPMBDjny2op07nirnS3OX6H3u+YDFGld+1Bg==}
     peerDependencies:
       '@azure/app-configuration': ^1.8.0
@@ -13679,6 +13590,7 @@ packages:
       uploadthing:
         optional: true
     dependencies:
+      '@vercel/kv': 3.0.0
       anymatch: 3.1.3
       chokidar: 3.6.0
       citty: 0.1.6
