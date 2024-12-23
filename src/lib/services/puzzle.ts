@@ -6,7 +6,7 @@ import { z } from "zod";
 export const generatePuzzleSchema = z.object({
   topic: z.string().min(1),
   difficulty: z.enum(["easy", "medium", "hard"]),
-  type: z.enum(["wordsearch", "trivia", "riddle", "anagram"]),
+  type: z.enum(["wordsearch", "quiz", "riddle", "anagram"]),
   gameId: z.number(),
 });
 
@@ -85,7 +85,7 @@ export function generatePuzzlePrompt(
       words: ["WORD1", "WORD2"], // Example words to find
       preSelectedWords: [], // Pre-selected words from our tracking system
     },
-    trivia: {
+    quiz: {
       content: "The trivia question with multiple choice options (A, B, C, D)",
       timeLimit: 60,
       additionalMetadata: {

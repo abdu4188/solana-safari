@@ -300,15 +300,22 @@ export default function WordSearchPuzzle() {
               {puzzle.words.map((word, index) => {
                 // Show partial words for longer or more complex terms
                 const shouldShowPartial = word.length > 6;
-                const partialWord = shouldShowPartial 
-                  ? word.split('').map((char, i) => {
-                      // Show first letter, last letter, and some middle letters
-                      if (i === 0 || i === word.length - 1 || Math.random() < 0.3) {
-                        return char;
-                      }
-                      return '_';
-                    }).join('')
-                  : word.replace(/[A-Z]/g, '_');
+                const partialWord = shouldShowPartial
+                  ? word
+                      .split("")
+                      .map((char, i) => {
+                        // Show first letter, last letter, and some middle letters
+                        if (
+                          i === 0 ||
+                          i === word.length - 1 ||
+                          Math.random() < 0.3
+                        ) {
+                          return char;
+                        }
+                        return "_";
+                      })
+                      .join("")
+                  : word.replace(/[A-Z]/g, "_");
 
                 return (
                   <div
@@ -324,8 +331,12 @@ export default function WordSearchPuzzle() {
                         <span className="font-semibold">{word}</span>
                       ) : (
                         <>
-                          <span className="font-mono">{puzzle.partialWords?.[index] || partialWord}</span>
-                          <span className="text-sm text-gray-600">{puzzle.hints?.[index] || 'Find this word!'}</span>
+                          <span className="font-mono">
+                            {puzzle.partialWords?.[index] || partialWord}
+                          </span>
+                          <span className="text-sm text-gray-600">
+                            {puzzle.hints?.[index] || "Find this word!"}
+                          </span>
                         </>
                       )}
                     </div>
