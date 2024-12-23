@@ -23,6 +23,7 @@
     "@solana/web3.js": "^1.98.0",
     "@t3-oss/env-nextjs": "^0.11.1",
     "@types/cheerio": "^0.22.35",
+    "@vercel/kv": "^3.0.0",
     "ai": "^4.0.21",
     "cheerio": "^1.0.0",
     "class-variance-authority": "^0.7.1",

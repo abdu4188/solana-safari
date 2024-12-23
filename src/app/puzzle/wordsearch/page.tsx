@@ -55,64 +55,48 @@ export default function WordSearchPuzzle() {
       }
 
       const data = await response.json();
-      console.log("API Response:", data);
 
       if (data.error) {
         Logger.error("api", "Puzzle generation error", { error: data.error });
         throw new Error(data.error);
       }
 
-      if (!data.success || !data.puzzle) {
-        throw new Error("Invalid puzzle data received");
+      // Start polling for puzzle status
+      const puzzleId = data.puzzleId;
+      let attempts = 0;
+      const maxAttempts = 30; // 30 seconds timeout
+
+      while (attempts < maxAttempts) {
+        const statusResponse = await fetch(`/api/puzzle-status/${puzzleId}`);
+        const statusData = await statusResponse.json();
+
+        if (statusData.status === "completed") {
+          console.log("Raw puzzle data:", statusData.puzzle);
+          // Extract grid and words from the correct location in the response
+          const grid =
+            statusData.puzzle.grid || statusData.puzzle.metadata?.grid;
+          if (grid) {
+            setPuzzleGrid(grid);
+            setWords(statusData.puzzle.words || []);
+            setSelectedCells([]);
+            setFoundWords([]);
+          }
+          break;
+        } else if (statusData.status === "error") {
+          throw new Error(statusData.error || "Failed to generate puzzle");
+        }
+
+        // Wait 1 second before next attempt
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        attempts++;
       }
 
-      console.log("Raw puzzle data:", data.puzzle);
-
-      // Extract grid and words from the correct location in the response
-      const grid = data.puzzle.grid || data.puzzle.metadata?.grid;
-      const words = data.puzzle.words || data.puzzle.metadata?.words;
-
-      if (!grid || !Array.isArray(grid) || grid.length === 0) {
-        Logger.error("api", "Invalid grid data", { grid });
-        throw new Error("Invalid grid data received");
+      if (attempts >= maxAttempts) {
+        throw new Error("Puzzle generation timed out");
       }
-
-      if (!words || !Array.isArray(words) || words.length === 0) {
-        Logger.error("api", "Invalid words data", { words });
-        throw new Error("Invalid words data received");
-      }
-
-      // Convert the API response to the expected WordSearchPuzzle format
-      const puzzleData: WordSearchPuzzle = {
-        id: data.puzzle.id.toString(),
-        type: "wordsearch",
-        difficulty: data.puzzle.difficulty || "medium",
-        content:
-          data.puzzle.content ||
-          "Find these Solana and Web3 terms hidden in the grid",
-        solution: data.puzzle.solution || "",
-        points: data.puzzle.points || 100,
-        hints: data.puzzle.hints || [],
-        grid: grid,
-        words: words,
-      };
-
-      console.log("Converted puzzle data:", puzzleData);
-
-      Logger.info("ai", "Successfully generated puzzle", {
-        wordCount: puzzleData.words.length,
-        gridSize: puzzleData.grid.length,
-      });
-
-      setPuzzle(puzzleData);
     } catch (error) {
-      console.error("Failed to load puzzle:", error);
-      Logger.error("api", "Failed to load puzzle", { error });
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load a new puzzle. Please try again.",
-      });
+      console.error("Error:", error);
+      setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
       setLoading(false);
     }

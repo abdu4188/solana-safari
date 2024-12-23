@@ -3,10 +3,15 @@ import {
   generatePuzzleSchema,
   generatePuzzlePrompt,
   savePuzzle,
+  PuzzleType,
 } from "@/lib/services/puzzle";
 import { getEmbedding, generatePuzzleWithAI } from "@/lib/services/openai";
 import { searchSimilarContent } from "@/lib/services/embeddings";
 import Logger from "@/lib/logger";
+import { kv } from "@vercel/kv";
+import { nanoid } from "nanoid";
+
+export const runtime = "edge";
 
 export async function POST(req: Request) {
   Logger.info("api", "Received puzzle generation request");
@@ -15,6 +20,52 @@ export async function POST(req: Request) {
     const { topic, difficulty, type, gameId } =
       generatePuzzleSchema.parse(body);
 
+    // Generate a unique ID for this puzzle generation request
+    const puzzleId = nanoid();
+
+    // Store initial status in KV
+    await kv.set(`puzzle:${puzzleId}`, {
+      status: "processing",
+      createdAt: Date.now(),
+    });
+
+    // Start the generation process in the background
+    generatePuzzleInBackground(
+      puzzleId,
+      topic,
+      difficulty,
+      type as PuzzleType,
+      gameId
+    );
+
+    // Return immediately with the puzzle ID
+    return NextResponse.json({
+      success: true,
+      puzzleId,
+      status: "processing",
+    });
+  } catch (error) {
+    Logger.error("api", "Error initiating puzzle generation", { error });
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to initiate puzzle generation",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+async function generatePuzzleInBackground(
+  puzzleId: string,
+  topic: string,
+  difficulty: string,
+  type: PuzzleType,
+  gameId: number
+) {
+  try {
     Logger.info("api", "Processing puzzle generation request", {
       topic,
       difficulty,
@@ -57,22 +108,20 @@ export async function POST(req: Request) {
       relevantContent
     );
 
-    Logger.info("api", "Successfully generated and saved puzzle", {
-      puzzleId: savedPuzzle.id,
-    });
-
-    return NextResponse.json({
-      success: true,
+    // Update KV with completed puzzle
+    await kv.set(`puzzle:${puzzleId}`, {
+      status: "completed",
       puzzle: savedPuzzle,
+      completedAt: Date.now(),
     });
   } catch (error) {
-    Logger.error("api", "Error generating puzzle", { error });
-    return NextResponse.json(
-      {
-        error:
-          error instanceof Error ? error.message : "Failed to generate puzzle",
-      },
-      { status: 500 }
-    );
+    Logger.error("api", "Error generating puzzle in background", { error });
+    // Update KV with error status
+    await kv.set(`puzzle:${puzzleId}`, {
+      status: "error",
+      error:
+        error instanceof Error ? error.message : "Failed to generate puzzle",
+      completedAt: Date.now(),
+    });
   }
 }
