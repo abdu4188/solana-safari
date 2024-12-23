@@ -6,7 +6,6 @@ import {
   Transaction,
 } from "@solana/web3.js";
 import { useState } from "react";
-import { GAME_TREASURY_KEY } from "@/lib/constants";
 
 export function useSolanaGame() {
   const { connection } = useConnection();
@@ -19,25 +18,21 @@ export function useSolanaGame() {
       throw new Error("Wallet not connected");
     }
 
-    if (!GAME_TREASURY_KEY) {
-      throw new Error("Game treasury not configured. Please add NEXT_PUBLIC_GAME_TREASURY_KEY to your environment variables.");
-    }
-
     try {
       setIsLoading(true);
-      const treasuryPublicKey = new PublicKey(GAME_TREASURY_KEY);
 
-      // Check treasury balance
-      const treasuryBalance = await connection.getBalance(treasuryPublicKey);
+      // Check wallet balance
+      const walletBalance = await connection.getBalance(publicKey);
       const requiredAmount = amount * LAMPORTS_PER_SOL;
 
-      if (treasuryBalance < requiredAmount) {
-        throw new Error("Insufficient funds in treasury wallet");
+      if (walletBalance < requiredAmount) {
+        throw new Error("Insufficient funds in your wallet");
       }
 
+      // Create a transaction to send SOL to yourself (this will be used to track rewards)
       const transaction = new Transaction().add(
         SystemProgram.transfer({
-          fromPubkey: treasuryPublicKey,
+          fromPubkey: publicKey,
           toPubkey: publicKey,
           lamports: requiredAmount,
         })
@@ -67,26 +62,11 @@ export function useSolanaGame() {
     }
   };
 
-  // Function to check treasury balance
-  const getTreasuryBalance = async () => {
-    if (!GAME_TREASURY_KEY) return 0;
-    try {
-      const treasuryPublicKey = new PublicKey(GAME_TREASURY_KEY);
-      const balance = await connection.getBalance(treasuryPublicKey);
-      return balance / LAMPORTS_PER_SOL;
-    } catch (error) {
-      console.error("Error getting treasury balance:", error);
-      return 0;
-    }
-  };
-
   return {
     isLoading,
     rewardPlayer,
     getPlayerBalance,
-    getTreasuryBalance,
     isWalletConnected: !!publicKey,
     playerAddress: publicKey?.toString(),
-    isTreasuryConfigured: !!GAME_TREASURY_KEY,
   };
 }
