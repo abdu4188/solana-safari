@@ -11,6 +11,7 @@ export const generatePuzzleSchema = z.object({
 });
 
 export type PuzzleInput = z.infer<typeof generatePuzzleSchema>;
+export type PuzzleType = z.infer<typeof generatePuzzleSchema>["type"];
 
 interface PuzzleData {
   title: string;
