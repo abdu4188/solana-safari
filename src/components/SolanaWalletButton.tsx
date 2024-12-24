@@ -43,9 +43,6 @@ export function SolanaWalletButton() {
       <WalletMultiButton />
       {isWalletConnected && (
         <div className="flex flex-col items-center gap-1">
-          <div className="text-sm text-white">
-            Balance: {balance.toFixed(4)} SOL
-          </div>
           <UserPoints />
           <SolRewardButton />
         </div>

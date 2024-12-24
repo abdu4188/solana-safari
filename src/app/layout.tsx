@@ -11,8 +11,8 @@ import Link from "next/link";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Sol Quest: Learn & Earn on the Solana Blockchain",
-  description: "Embark on an exciting journey into the Solana ecosystem with Sol Quest! Our gamified learning platform makes mastering Solana fun and rewarding. Learn about blockchain technology, DeFi, NFTs, and more while earning rewards along the way.",
+  title: "Solana Safari: Learn & Earn on the Solana Blockchain",
+  description: "Embark on an exciting journey into the Solana ecosystem with Solana Safari! Our gamified learning platform makes mastering Solana fun and rewarding. Learn about blockchain technology, DeFi, NFTs, and more while earning rewards along the way.",
 };
 
 export default function RootLayout({
@@ -57,8 +57,8 @@ export default function RootLayout({
                       <Image
                         src="/logo.svg"
                         alt="Crypto Word Puzzle"
-                        width={300}
-                        height={300}
+                        width={250}
+                        height={250}
                         className="dark:invert"
                       />
                     </Link>
@@ -71,7 +71,7 @@ export default function RootLayout({
               <main className="pt-20 mt-32">
                 {children}
               </main>
-              <footer className="mt-auto py-8 text-center text-white/60 text-sm">
+              <footer className="fixed bottom-0 left-0 right-0 z-50 mt-auto py-8 text-center text-white/60 text-sm">
                 <p>Built with ❤️ on Solana</p>
               </footer>
             </div>

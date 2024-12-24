@@ -9,6 +9,10 @@ import {
 import { getEmbedding, generatePuzzleWithAI } from "@/lib/services/openai";
 import { searchSimilarContent } from "@/lib/services/embeddings";
 import Logger from "@/lib/logger";
+import { kv } from "@vercel/kv";
+import { nanoid } from "nanoid";
+
+export const runtime = 'nodejs'
 
 export async function POST(req: Request) {
   Logger.info("api", "Received puzzle generation request");
