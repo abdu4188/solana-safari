@@ -1,8 +1,8 @@
 import { OpenAI } from "openai";
-import { config } from "dotenv";
+// import { config } from "dotenv";
 
 // Load environment variables
-config();
+// config();
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
