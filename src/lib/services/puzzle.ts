@@ -1,7 +1,9 @@
 import { db } from "@/lib/db";
-import { puzzles } from "@/lib/db/schema/resources";
+import { puzzles, games } from "@/lib/db/schema/resources";
 import { EmbeddingSearchResult } from "./embeddings";
 import { z } from "zod";
+import Logger from "@/lib/logger";
+import { eq } from "drizzle-orm";
 
 export const generatePuzzleSchema = z.object({
   topic: z.string().min(1),
@@ -164,6 +166,33 @@ ${JSON.stringify(structure, null, 2)}`;
   return { structure, prompt };
 }
 
+async function ensureDefaultGame() {
+  try {
+    // Check if game with ID 1 exists
+    const existingGame = await db.select().from(games).where(eq(games.id, 1));
+
+    if (existingGame.length === 0) {
+      Logger.info("api", "Creating default game");
+      const [game] = await db
+        .insert(games)
+        .values({
+          name: "Word Puzzle Game",
+          description: "A collection of word-based puzzles",
+          rules: {},
+          config: {},
+          isActive: true,
+        })
+        .returning();
+      return game;
+    }
+
+    return existingGame[0];
+  } catch (error) {
+    Logger.error("api", "Failed to ensure default game exists", { error });
+    throw new Error("Failed to initialize game data");
+  }
+}
+
 export async function savePuzzle(
   gameId: number,
   puzzleData: PuzzleData,
@@ -171,46 +200,68 @@ export async function savePuzzle(
   difficulty: PuzzleInput["difficulty"],
   relevantContent: EmbeddingSearchResult[]
 ) {
-  const metadata: WordSearchMetadata = {
-    generatedBy: "ai",
-    puzzleType: type,
-    relevantContent: relevantContent.map((item) => ({
-      content: item.content,
-      similarity: item.similarity,
-      metadata: item.metadata,
-    })),
-  };
+  try {
+    // Ensure default game exists
+    await ensureDefaultGame();
 
-  // For word search puzzles, include grid and words in metadata
-  if (type === "wordsearch" && puzzleData.grid && puzzleData.words) {
-    metadata.grid = puzzleData.grid;
-    metadata.words = puzzleData.words;
-  }
-
-  const [savedPuzzle] = await db
-    .insert(puzzles)
-    .values({
-      gameId,
-      title: puzzleData.title,
-      content: puzzleData.content,
-      solution: puzzleData.solution,
-      difficulty,
-      hints: puzzleData.hints,
-      timeLimit: puzzleData.timeLimit,
-      points: puzzleData.points,
-      metadata,
-      isActive: true,
-    })
-    .returning();
-
-  // For word search puzzles, add grid and words to the response
-  if (type === "wordsearch" && metadata.grid && metadata.words) {
-    return {
-      ...savedPuzzle,
-      grid: metadata.grid,
-      words: metadata.words,
+    const metadata: WordSearchMetadata = {
+      generatedBy: "ai",
+      puzzleType: type,
+      relevantContent: relevantContent.map((item) => ({
+        content: item.content,
+        similarity: item.similarity,
+        metadata: item.metadata,
+      })),
     };
-  }
 
-  return savedPuzzle;
+    // For word search puzzles, include grid and words in metadata
+    if (type === "wordsearch" && puzzleData.grid && puzzleData.words) {
+      metadata.grid = puzzleData.grid;
+      metadata.words = puzzleData.words;
+    }
+
+    Logger.info("api", "Attempting to save puzzle to database", {
+      gameId,
+      type,
+      difficulty,
+    });
+
+    const [savedPuzzle] = await db
+      .insert(puzzles)
+      .values({
+        gameId,
+        title: puzzleData.title,
+        content: puzzleData.content,
+        solution: puzzleData.solution,
+        difficulty,
+        hints: puzzleData.hints,
+        timeLimit: puzzleData.timeLimit,
+        points: puzzleData.points,
+        metadata,
+        isActive: true,
+      })
+      .returning();
+
+    Logger.info("api", "Successfully saved puzzle to database", {
+      puzzleId: savedPuzzle.id,
+    });
+
+    // For word search puzzles, add grid and words to the response
+    if (type === "wordsearch" && metadata.grid && metadata.words) {
+      return {
+        ...savedPuzzle,
+        grid: metadata.grid,
+        words: metadata.words,
+      };
+    }
+
+    return savedPuzzle;
+  } catch (error) {
+    Logger.error("api", "Failed to save puzzle to database", { error });
+    throw new Error(
+      `Database error: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
+    );
+  }
 }
