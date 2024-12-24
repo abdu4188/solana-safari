@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,11 +21,7 @@ export default function AnagramPuzzle() {
   const { toast } = useToast();
   const { userId } = useAuth();
 
-  useEffect(() => {
-    loadNewPuzzle();
-  }, []);
-
-  const loadNewPuzzle = async () => {
+  const loadNewPuzzle = useCallback(async () => {
     setLoading(true);
     setShowHint(false);
     try {
@@ -52,9 +48,54 @@ export default function AnagramPuzzle() {
         throw new Error(data.error);
       }
 
-      setPuzzle(data.puzzle);
-      setAnswer("");
-      setIsCorrect(false);
+      // If we got a complete puzzle immediately (from cache), use it
+      if (data.puzzle && data.puzzle.content && data.puzzle.solution) {
+        setPuzzle(data.puzzle);
+        setAnswer("");
+        setIsCorrect(false);
+        return;
+      }
+
+      // Otherwise, start polling with exponential backoff
+      const puzzleId = data.puzzle.id;
+      let attempts = 0;
+      const maxAttempts = 60; // 60 seconds total timeout
+      let lastError = null;
+      let backoffMs = 500; // Start with 500ms delay
+
+      while (attempts < maxAttempts) {
+        try {
+          const statusResponse = await fetch(`/api/puzzle-status/${puzzleId}`);
+          const statusData = await statusResponse.json();
+
+          if (statusData.status === "completed") {
+            setPuzzle(statusData.puzzle);
+            setAnswer("");
+            setIsCorrect(false);
+            return;
+          } else if (statusData.status === "error") {
+            lastError = statusData.error;
+            throw new Error(statusData.error || "Failed to generate puzzle");
+          }
+
+          // Exponential backoff with max of 3 seconds
+          backoffMs = Math.min(backoffMs * 1.5, 3000);
+          await new Promise((resolve) => setTimeout(resolve, backoffMs));
+          attempts++;
+        } catch (pollError) {
+          console.error("Polling error:", pollError);
+          lastError = pollError;
+          backoffMs = Math.min(backoffMs * 1.5, 3000);
+          await new Promise((resolve) => setTimeout(resolve, backoffMs));
+          attempts++;
+        }
+      }
+
+      throw new Error(
+        `Puzzle generation timed out after ${maxAttempts} seconds. ${
+          lastError ? `Last error: ${lastError}` : ""
+        }`
+      );
     } catch (error) {
       console.error("Error:", error);
       toast({
@@ -66,7 +107,11 @@ export default function AnagramPuzzle() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    loadNewPuzzle();
+  }, [loadNewPuzzle]);
 
   const checkAnswer = async () => {
     if (!puzzle || !userId || !answer) return;

@@ -63,39 +63,67 @@ export default function WordSearchPuzzle() {
         throw new Error(data.error);
       }
 
-      // Start polling for puzzle status
-      const puzzleId = data.puzzleId;
+      // If we got a complete puzzle immediately (from cache), use it
+      if (data.puzzle && data.puzzle.grid && data.puzzle.words) {
+        Logger.info("api", "Using cached puzzle");
+        setPuzzleGrid(data.puzzle.grid);
+        setWords(data.puzzle.words);
+        setSelectedCells([]);
+        setFoundWords([]);
+        return;
+      }
+
+      // Otherwise, start polling with exponential backoff
+      const puzzleId = data.puzzle.id;
       let attempts = 0;
-      const maxAttempts = 30; // 30 seconds timeout
+      const maxAttempts = 60; // 60 seconds total timeout
+      let lastError = null;
+      let backoffMs = 500; // Start with 500ms delay
 
       while (attempts < maxAttempts) {
-        const statusResponse = await fetch(`/api/puzzle-status/${puzzleId}`);
-        const statusData = await statusResponse.json();
+        try {
+          const statusResponse = await fetch(`/api/puzzle-status/${puzzleId}`);
+          const statusData = await statusResponse.json();
 
-        if (statusData.status === "completed") {
-          console.log("Raw puzzle data:", statusData.puzzle);
-          // Extract grid and words from the correct location in the response
-          const grid =
-            statusData.puzzle.grid || statusData.puzzle.metadata?.grid;
-          if (grid) {
-            setPuzzleGrid(grid);
-            setWords(statusData.puzzle.words || []);
-            setSelectedCells([]);
-            setFoundWords([]);
+          if (statusData.status === "completed") {
+            Logger.info("api", "Puzzle generation completed");
+            const grid =
+              statusData.puzzle.grid || statusData.puzzle.metadata?.grid;
+            const words =
+              statusData.puzzle.words || statusData.puzzle.metadata?.words;
+
+            if (grid && words) {
+              setPuzzleGrid(grid);
+              setWords(words);
+              setSelectedCells([]);
+              setFoundWords([]);
+              return;
+            } else {
+              throw new Error("Invalid puzzle data: missing grid or words");
+            }
+          } else if (statusData.status === "error") {
+            lastError = statusData.error;
+            throw new Error(statusData.error || "Failed to generate puzzle");
           }
-          break;
-        } else if (statusData.status === "error") {
-          throw new Error(statusData.error || "Failed to generate puzzle");
+
+          // Exponential backoff with max of 3 seconds
+          backoffMs = Math.min(backoffMs * 1.5, 3000);
+          await new Promise((resolve) => setTimeout(resolve, backoffMs));
+          attempts++;
+        } catch (pollError) {
+          Logger.error("api", "Polling error", { error: pollError });
+          lastError = pollError;
+          backoffMs = Math.min(backoffMs * 1.5, 3000);
+          await new Promise((resolve) => setTimeout(resolve, backoffMs));
+          attempts++;
         }
-
-        // Wait 1 second before next attempt
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        attempts++;
       }
 
-      if (attempts >= maxAttempts) {
-        throw new Error("Puzzle generation timed out");
-      }
+      throw new Error(
+        `Puzzle generation timed out after ${maxAttempts} seconds. ${
+          lastError ? `Last error: ${lastError}` : ""
+        }`
+      );
     } catch (error) {
       console.error("Error:", error);
       setError(error instanceof Error ? error.message : "An error occurred");
