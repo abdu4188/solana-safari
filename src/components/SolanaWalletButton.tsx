@@ -9,23 +9,14 @@ import { SolRewardButton } from "./SolRewardButton";
 
 export function SolanaWalletButton() {
   const { isWalletConnected, getPlayerBalance } = useSolanaGame();
-  const [balance, setBalance] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchBalance = async () => {
-    if (isWalletConnected) {
-      const bal = await getPlayerBalance();
-      setBalance(bal);
-    }
-  };
 
   useEffect(() => {
     setIsLoading(false);
-    fetchBalance();
 
     // Listen for point updates to refresh balance
     const cleanup = onPointsUpdated(() => {
-      fetchBalance();
     });
     return cleanup;
   }, [isWalletConnected, getPlayerBalance]);
