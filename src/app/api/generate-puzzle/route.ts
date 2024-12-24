@@ -4,14 +4,13 @@ import {
   generatePuzzlePrompt,
   savePuzzle,
   PuzzleType,
+  PuzzleInput,
 } from "@/lib/services/puzzle";
 import { getEmbedding, generatePuzzleWithAI } from "@/lib/services/openai";
 import { searchSimilarContent } from "@/lib/services/embeddings";
 import Logger from "@/lib/logger";
 import { kv } from "@vercel/kv";
 import { nanoid } from "nanoid";
-
-export const runtime = "edge";
 
 export async function POST(req: Request) {
   Logger.info("api", "Received puzzle generation request");
@@ -61,7 +60,7 @@ export async function POST(req: Request) {
 async function generatePuzzleInBackground(
   puzzleId: string,
   topic: string,
-  difficulty: string,
+  difficulty: PuzzleInput["difficulty"],
   type: PuzzleType,
   gameId: number
 ) {
