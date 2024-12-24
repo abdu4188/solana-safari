@@ -38,6 +38,11 @@ export function SolanaWalletButton() {
           <SolRewardButton />
         </div>
       )}
+      {balance && (
+        <div className="text-sm text-muted-foreground mt-2">
+          Balance: {balance} SOL
+        </div>
+      )}
     </div>
   );
 }
