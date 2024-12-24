@@ -16,7 +16,9 @@ export default function WordSearchPuzzle() {
   const [selectedCells, setSelectedCells] = useState<string[]>([]);
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [puzzle, setPuzzle] = useState<WordSearchPuzzle | null>(null);
+  const [puzzleGrid, setPuzzleGrid] = useState<string[][]>([]);
+  const [words, setWords] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const { userId } = useAuth();
 
@@ -112,12 +114,12 @@ export default function WordSearchPuzzle() {
   };
 
   const checkWord = async () => {
-    if (!puzzle || !userId) return;
+    if (!puzzleGrid || !userId) return;
 
     const selectedWord = selectedCells
       .map((cellId) => {
         const [row, col] = cellId.split("-").map(Number);
-        return puzzle.grid[row][col];
+        return puzzleGrid[row][col];
       })
       .join("");
 
@@ -126,25 +128,22 @@ export default function WordSearchPuzzle() {
       selectedCells,
     });
 
-    if (
-      puzzle.words.includes(selectedWord) &&
-      !foundWords.includes(selectedWord)
-    ) {
+    if (words.includes(selectedWord) && !foundWords.includes(selectedWord)) {
       const newFoundWords = [...foundWords, selectedWord];
       setFoundWords(newFoundWords);
 
-      if (newFoundWords.length === puzzle.words.length) {
+      if (newFoundWords.length === words.length) {
         Logger.info("app", "Puzzle completed", {
           foundWords: newFoundWords,
-          totalWords: puzzle.words.length,
+          totalWords: words.length,
         });
 
         // All words found - create reward
         const result = await createReward({
           userId: userId,
-          puzzleId: parseInt(puzzle.id),
+          puzzleId: 1, // TODO: Get actual puzzle ID
           tokenType: "points",
-          tokenAmount: puzzle.points,
+          tokenAmount: 100, // TODO: Get actual points
           reason: "Word search puzzle completed",
         });
 
@@ -154,12 +153,12 @@ export default function WordSearchPuzzle() {
 
           Logger.info("api", "Reward created for puzzle completion", {
             userId,
-            puzzleId: puzzle.id,
-            points: puzzle.points,
+            puzzleId: 1,
+            points: 100,
           });
 
           toast({
-            description: `🎉 Congratulations! You earned ${puzzle.points} points!`,
+            description: `🎉 Congratulations! You earned 100 points!`,
             className: "bg-green-500 text-white",
           });
         }
@@ -167,7 +166,7 @@ export default function WordSearchPuzzle() {
         Logger.info("app", "Word found", {
           word: selectedWord,
           foundWordsCount: newFoundWords.length,
-          totalWords: puzzle.words.length,
+          totalWords: words.length,
         });
 
         toast({
@@ -176,7 +175,7 @@ export default function WordSearchPuzzle() {
         });
       }
       setSelectedCells([]);
-    } else if (puzzle.words.includes(selectedWord)) {
+    } else if (words.includes(selectedWord)) {
       Logger.debug("app", "Word already found", { selectedWord });
       toast({
         description: "🔍 You've already found this word!",
@@ -197,11 +196,16 @@ export default function WordSearchPuzzle() {
     return (
       <div className="container mx-auto p-8 flex flex-col items-center justify-center min-h-[400px]">
         <div className="relative w-16 h-16 mb-4">
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-spin" style={{ animationDuration: '3s' }}></div>
+          <div
+            className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-spin"
+            style={{ animationDuration: "3s" }}
+          ></div>
           <div className="absolute inset-1 bg-white rounded-full"></div>
           <div className="absolute inset-3 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-pulse"></div>
         </div>
-        <h2 className="text-xl font-semibold mb-2 animate-pulse">Generating Your Puzzle</h2>
+        <h2 className="text-xl font-semibold mb-2 animate-pulse">
+          Generating Your Puzzle
+        </h2>
         <p className="text-muted-foreground text-center">
           Our AI is crafting a unique word search experience...
         </p>
@@ -209,10 +213,12 @@ export default function WordSearchPuzzle() {
     );
   }
 
-  if (!puzzle) {
+  if (!puzzleGrid || !words) {
     return (
       <div className="container mx-auto p-4 text-center">
-        <p>Error loading puzzle. Please try again.</p>
+        <p className="text-red-500 mb-4">
+          {error || "Error loading puzzle. Please try again."}
+        </p>
         <Button onClick={loadNewPuzzle} className="mt-4">
           Try Again
         </Button>
@@ -220,9 +226,7 @@ export default function WordSearchPuzzle() {
     );
   }
 
-  const allWordsFound = puzzle?.words
-    ? foundWords.length === puzzle.words.length
-    : false;
+  const allWordsFound = words ? foundWords.length === words.length : false;
 
   return (
     <div className="container mx-auto p-4">
@@ -241,103 +245,70 @@ export default function WordSearchPuzzle() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div>
-          <Card className="p-4">
-            <div className="grid grid-cols-10 gap-1">
-              {puzzle.grid.map((row, rowIndex) =>
-                row.map((letter, colIndex) => (
-                  <Button
-                    key={`${rowIndex}-${colIndex}`}
-                    variant={
-                      selectedCells.includes(`${rowIndex}-${colIndex}`)
-                        ? "secondary"
-                        : "outline"
-                    }
-                    className="w-8 h-8 sm:w-10 sm:h-10 p-0 font-bold text-sm sm:text-base"
-                    onClick={() => handleCellClick(rowIndex, colIndex)}
-                  >
-                    {letter}
-                  </Button>
-                ))
-              )}
-            </div>
-          </Card>
-          <div className="mt-4 space-y-2">
-            <Button
-              className="w-full"
-              onClick={checkWord}
-              disabled={selectedCells.length === 0}
-            >
-              Check Word
-            </Button>
-            {allWordsFound && (
-              <Button
-                className="w-full"
-                onClick={() => {
-                  setFoundWords([]);
-                  setSelectedCells([]);
-                  loadNewPuzzle();
-                }}
-              >
-                Play Again
-              </Button>
-            )}
-          </div>
-        </div>
-
-        <div>
-          <Card className="p-4">
-            <h2 className="text-xl font-semibold mb-4">Words to Find</h2>
-            <div className="space-y-2">
-              {puzzle.words.map((word, index) => {
-                // Show partial words for longer or more complex terms
-                const shouldShowPartial = word.length > 6;
-                const partialWord = shouldShowPartial
-                  ? word
-                      .split("")
-                      .map((char, i) => {
-                        // Show first letter, last letter, and some middle letters
-                        if (
-                          i === 0 ||
-                          i === word.length - 1 ||
-                          Math.random() < 0.3
-                        ) {
-                          return char;
-                        }
-                        return "_";
-                      })
-                      .join("")
-                  : word.replace(/[A-Z]/g, "_");
-
+        <Card className="p-4">
+          <div className="grid grid-cols-10 gap-1">
+            {puzzleGrid.map((row: string[], rowIndex: number) =>
+              row.map((letter: string, colIndex: number) => {
+                const cellId = `${rowIndex}-${colIndex}`;
+                const isSelected = selectedCells.includes(cellId);
                 return (
-                  <div
-                    key={word}
-                    className={`p-2 rounded ${
-                      foundWords.includes(word)
-                        ? "bg-green-100 text-green-800"
-                        : "bg-gray-100 text-gray-800"
+                  <button
+                    key={cellId}
+                    onClick={() => handleCellClick(rowIndex, colIndex)}
+                    className={`w-8 h-8 flex items-center justify-center font-bold rounded ${
+                      isSelected
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary hover:bg-secondary/80"
                     }`}
                   >
-                    <div className="flex flex-col space-y-1">
-                      {foundWords.includes(word) ? (
-                        <span className="font-semibold">{word}</span>
-                      ) : (
-                        <>
-                          <span className="font-mono">
-                            {puzzle.partialWords?.[index] || partialWord}
-                          </span>
-                          <span className="text-sm text-gray-600">
-                            {puzzle.hints?.[index] || "Find this word!"}
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
+                    {letter}
+                  </button>
                 );
-              })}
+              })
+            )}
+          </div>
+          <div className="mt-4 flex justify-between">
+            <Button onClick={() => setSelectedCells([])}>
+              Clear Selection
+            </Button>
+            <Button onClick={checkWord}>Check Word</Button>
+          </div>
+        </Card>
+
+        <Card className="p-4">
+          <h2 className="text-xl font-semibold mb-4">Words to Find</h2>
+          <div className="grid grid-cols-2 gap-2">
+            {words.map((word: string, index: number) => (
+              <div
+                key={index}
+                className={`p-2 rounded ${
+                  foundWords.includes(word)
+                    ? "bg-green-500/20 line-through"
+                    : "bg-secondary"
+                }`}
+              >
+                {word.split("").map((char: string, i: number) => (
+                  <span
+                    key={i}
+                    className={
+                      foundWords.includes(word) ? "text-green-700" : ""
+                    }
+                  >
+                    {char}
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
+          {allWordsFound && (
+            <div className="mt-4 text-center">
+              <p className="text-green-600 font-semibold mb-2">
+                🎉 Congratulations! You found all the words!
+              </p>
+              <Button onClick={loadNewPuzzle}>Play Again</Button>
             </div>
-          </Card>
-        </div>
+          )}
+        </Card>
       </div>
       <Toaster />
     </div>
